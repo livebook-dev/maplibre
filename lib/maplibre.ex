@@ -34,15 +34,14 @@ defmodule Maplibre do
 
   ## Expressions
 
-    Expressions are extremely powerful and useful to render complex data. To use them just ensure
-    that you pass valid expressions following the rules and syntax of the [official
-    documentation](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/)
-
+  Expressions are extremely powerful and useful to render complex data. To use them just ensure
+  that you pass valid expressions following the rules and syntax of the [official
+  documentation](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/)
 
   ## Options
 
-    To provide a more Elixir-friendly experience, the options are automatically normalized, so you
-    can use keyword lists and snake-case atom keys.
+  To provide a more Elixir-friendly experience, the options are automatically normalized, so you
+  can use keyword lists and snake-case atom keys.
   """
 
   alias Maplibre.Utils
