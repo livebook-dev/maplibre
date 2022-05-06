@@ -34,15 +34,14 @@ defmodule Maplibre do
 
   ## Expressions
 
-    Expressions are extremely powerful and useful to render complex data. To use them just ensure
-    that you pass valid expressions following the rules and syntax of the [official
-    documentation](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/)
-
+  Expressions are extremely powerful and useful to render complex data. To use them just ensure
+  that you pass valid expressions following the rules and syntax of the [official
+  documentation](https://maplibre.org/maplibre-gl-js-docs/style-spec/expressions/)
 
   ## Options
 
-    To provide a more Elixir-friendly experience, the options are automatically normalized, so you
-    can use keyword lists and snake-case atom keys.
+  To provide a more Elixir-friendly experience, the options are automatically normalized, so you
+  can use keyword lists and snake-case atom keys.
   """
 
   alias Maplibre.Utils
@@ -64,7 +63,7 @@ defmodule Maplibre do
 
   ## Options
 
-    Only the following properties are allowed directly on `new/1`
+  Only the following properties are allowed directly on `new/1`
 
     * `:bearing` -  Default bearing, in degrees. The bearing is the compass direction that is
       "up"; for example, a bearing of 90° orients the map so that east is up. This value will be
@@ -88,11 +87,12 @@ defmodule Maplibre do
     * `:style` - The initial style specification. Default:
       "https://demotiles.maplibre.org/style.json"
 
-    To manipulate any other [style root
-    properties](https://maplibre.org/maplibre-gl-js-docs/style-spec/root/), use the
-    corresponding functions
+  To manipulate any other [style root
+  properties](https://maplibre.org/maplibre-gl-js-docs/style-spec/root/), use the
+  corresponding functions
 
   ## Examples
+
       Ml.new(
         center: {-74.5, 40},
         zoom: 9,
@@ -141,6 +141,7 @@ defmodule Maplibre do
   property, which must be one of `:vector`, `:raster`, `:raster_dem`, `:geojson`, `:image` or `:video`.
 
   ## Examples
+
       |> Ml.add_source("rwanda-provinces",
             type: :geojson,
             data: "https://maplibre.org/maplibre-gl-js-docs/assets/rwanda-provinces.geojson"
@@ -187,10 +188,7 @@ defmodule Maplibre do
 
     * `:id` - Unique layer name.
 
-    * `:type` - One of `:fill`, `:line`, `:symbol`, `:circle`, `:heatmap` `:fill_extrusion`,
-      `:raster`, `:hillshade` or `:background`.
-
-      ### Rendering type of this layer.
+    * `:type` - One of:
 
       * `:fill` -  A filled polygon with an optional stroked border.
       * `:line` -  A stroked line.
