@@ -1,11 +1,27 @@
 # Maplibre
 
-**TODO: Add description**
+Elixir bindings to [MapLibre Style
+Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/).
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `maplibre` to your list of dependencies in `mix.exs`:
+### Inside Livebook
+
+You most likely want to use Maplibre in [Livebook](https://github.com/livebook-dev/livebook), in
+which case you can call `Mix.install/2`:
+
+```elixir
+Mix.install([
+  {:maplibre, "~> 0.1.0"},
+  {:kino_maplibre "~> 0.1.0"}
+])
+```
+
+`:kino_maplibre` is necessary to ensure Livebook renders the maps nicely
+
+### In Mix projects
+
+You can add the `:maplibre` dependency to your `mix.exs`:
 
 ```elixir
 def deps do
@@ -15,7 +31,4 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/maplibre>.
-
+## License
