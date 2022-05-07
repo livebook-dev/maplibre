@@ -1,4 +1,4 @@
-defmodule Maplibre do
+defmodule MapLibre do
   @moduledoc """
   Elixir bindings to [MapLibre Style
   Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/).
@@ -13,7 +13,7 @@ defmodule Maplibre do
 
   Laying out a basic MapLibre map consists of the following steps:
 
-      alias Maplibre, as: Ml
+      alias MapLibre, as: Ml
 
       # Initialize the specification with the initial style and optionally some other root properties.
       # If you don't provide a initial style, the default style will be loaded for you
@@ -44,7 +44,7 @@ defmodule Maplibre do
   can use keyword lists and snake-case atom keys.
   """
 
-  alias Maplibre.Utils
+  alias MapLibre.Utils
 
   @default_style "https://demotiles.maplibre.org/style.json"
   @to_kebab Utils.kebab_case_properties()
@@ -56,7 +56,7 @@ defmodule Maplibre do
   @type spec :: map()
 
   @doc """
-  Returns a style specification wrapped in the `Maplibre` struct. If you don't provide a initial
+  Returns a style specification wrapped in the `MapLibre` struct. If you don't provide a initial
   style, the [default style](https://demotiles.maplibre.org/style.json) will be loaded for you. If
   you wish to build a new style completely from scratch, pass an empty map `%{}` as `:style`
   option. The style specification version will be automatically set to 8.
@@ -106,7 +106,7 @@ defmodule Maplibre do
   def new(opts \\ []) do
     validade_new_opts!(opts)
     style = opts |> Keyword.get(:style, @default_style) |> to_style()
-    ml = %Maplibre{spec: style}
+    ml = %MapLibre{spec: style}
     ml_props = opts |> Keyword.delete(:style) |> opts_to_ml_props()
     update_in(ml.spec, fn spec -> Map.merge(spec, ml_props) end)
   end
@@ -353,7 +353,7 @@ defmodule Maplibre do
   Sets the sprite url in the specification.
 
   A style's sprite property supplies a URL template for loading small images to use in rendering
-  background-pattern, fill-pattern, line-pattern,fill-extrusion-pattern and icon-image style
+  `:background_pattern`, `:fill_pattern`, `:line_pattern`,`:fill_extrusion_pattern` and `:icon_image` style
   properties.
 
   See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sprite/) for more details.

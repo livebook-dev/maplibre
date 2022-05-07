@@ -1,15 +1,15 @@
-defmodule Maplibre.MixProject do
+defmodule MapLibre.MixProject do
   use Mix.Project
 
   @version "0.1.0"
-  @description "Elixir bindings to Maplibre Style Specification"
+  @description "Elixir bindings to MapLibre Style Specification"
 
   def project do
     [
       app: :maplibre,
       version: @version,
       description: @description,
-      name: "Maplibre",
+      name: "MapLibre",
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -35,7 +35,7 @@ defmodule Maplibre.MixProject do
 
   defp docs do
     [
-      main: "Maplibre",
+      main: "MapLibre",
       source_url: "https://github.com/cristineguadelupe/maplibre",
       source_ref: "v#{@version}"
     ]

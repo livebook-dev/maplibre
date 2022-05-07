@@ -1,3 +1,3 @@
-defmodule MaplibreTest do
+defmodule MapLibreTest do
   use ExUnit.Case
 end

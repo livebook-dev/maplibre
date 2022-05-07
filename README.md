@@ -1,4 +1,4 @@
-# Maplibre
+# MapLibre
 
 Elixir bindings to [MapLibre Style
 Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/).
@@ -7,7 +7,7 @@ Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/).
 
 ### Inside Livebook
 
-You most likely want to use Maplibre in [Livebook](https://github.com/livebook-dev/livebook), in
+You most likely want to use MapLibre in [Livebook](https://github.com/livebook-dev/livebook), in
 which case you can call `Mix.install/2`:
 
 ```elixir

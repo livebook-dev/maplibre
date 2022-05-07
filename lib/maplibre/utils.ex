@@ -1,4 +1,4 @@
-defmodule Maplibre.Utils do
+defmodule MapLibre.Utils do
   @moduledoc false
 
   @kebab_case_properties %{
