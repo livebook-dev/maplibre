@@ -397,9 +397,9 @@ defmodule MapLibre do
   with the style, but do not influence rendering. Properties should be prefixed to avoid
   collisions, like "mapbox:".
   """
-  @spec metadata(t(), String.t(), keyword()) :: t()
-  def metadata(ml, metadata, opts) do
-    metadata = %{metadata => opts_to_ml_props(opts)}
+  @spec metadata(t(), String.t(), String.t()) :: t()
+  def metadata(ml, key, value) do
+    metadata = %{key => value}
     current_metadata = if ml.spec["metadata"], do: ml.spec["metadata"], else: %{}
     updated_metadata = Map.merge(current_metadata, metadata)
     update_in(ml.spec, fn spec -> Map.put(spec, "metadata", updated_metadata) end)
