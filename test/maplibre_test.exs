@@ -158,4 +158,42 @@ defmodule MapLibreTest do
       assert layer["paint"] == %{"fill-color" => "red"}
     end
   end
+
+  test "light/2" do
+    ml = Ml.new() |> Ml.light(color: "red")
+    assert ml.spec["light"] == %{"color" => "red"}
+  end
+
+  test "sprite/2" do
+    sprite = "https://api.maptiler.com/maps/streets/sprite"
+    ml = Ml.new() |> Ml.sprite(sprite)
+
+    assert ml.spec["sprite"] == sprite
+  end
+
+  test "glyphs/2" do
+    glyphs = "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf"
+    ml = Ml.new() |> Ml.glyphs(glyphs)
+
+    assert ml.spec["glyphs"] == glyphs
+  end
+
+  test "transition/2" do
+    ml = Ml.new() |> Ml.transition(duration: 300, delay: 0)
+    assert ml.spec["transition"] == %{"duration" => 300, "delay" => 0}
+  end
+
+  describe "metadata/3" do
+    test "adds metadata" do
+      ml = Ml.new() |> Ml.metadata("meta:data", "example")
+      assert ml.spec["metadata"]["meta:data"] == "example"
+    end
+
+    test "updates metadata" do
+      ml =
+        Ml.new() |> Ml.metadata("meta:data", "example") |> Ml.metadata("meta:data", "updated")
+
+      assert ml.spec["metadata"]["meta:data"] == "updated"
+    end
+  end
 end
