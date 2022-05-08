@@ -57,7 +57,7 @@ defmodule MapLibreTest do
       end
     end
 
-    test "raises an error when a invalid source type is given" do
+    test "raises an error when an invalid source type is given" do
       assert_raise ArgumentError,
                    "unknown source type, expected one of :vector, :raster, :raster_dem, :geojson, :image, :video, got: :invalid",
                    fn ->
@@ -77,6 +77,38 @@ defmodule MapLibreTest do
       source = ml.spec["sources"]["urban-areas"]
       assert source
       assert source["type"] == "geojson"
+    end
+  end
+
+  describe "add_layer/2" do
+    test "raises an error when no layer type is given" do
+      assert_raise ArgumentError, "layer type is required", fn ->
+        Ml.new() |> Ml.add_layer(id: "invalid")
+      end
+    end
+
+    test "raises an error when an invalid layer type is given" do
+      assert_raise ArgumentError,
+                   "unknown layer type, expected one of :background, :fill, :line, :symbol, :raster, :circle, :fill_extrusion, :heatmap, :hillshade, got: :invalid",
+                   fn ->
+                     Ml.new() |> Ml.add_layer(id: "invalid", type: :invalid)
+                   end
+    end
+
+    test "raises an error when the layer refers to a source that doesn't exist" do
+      assert_raise ArgumentError,
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   fn ->
+                     Ml.new() |> Ml.add_layer(id: "invalid", type: :fill, source: "invalid")
+                   end
+    end
+
+    test "adds a new layer into the map" do
+      ml = Ml.new() |> Ml.add_layer(id: "maplibre", type: :fill, source: "maplibre")
+      layer = Enum.find(ml.spec["layers"], &(&1["id"] == "maplibre"))
+      assert layer
+      assert layer["type"] == "fill"
+      assert layer["source"] == "maplibre"
     end
   end
 end
