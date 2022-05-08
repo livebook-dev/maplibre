@@ -144,4 +144,18 @@ defmodule MapLibreTest do
       assert layer_index == first_labels_index - 1
     end
   end
+
+  describe "update_layer/3" do
+    test "updates a given layer" do
+      ml =
+        Ml.new()
+        |> Ml.add_layer(id: "maplibre", type: :line, source: "maplibre")
+        |> Ml.update_layer("maplibre", type: :fill, paint: [fill_color: "red"])
+
+      layer = Enum.find(ml.spec["layers"], &(&1["id"] == "maplibre"))
+      assert layer["type"] == "fill"
+      assert layer["source"] == "maplibre"
+      assert layer["paint"] == %{"fill-color" => "red"}
+    end
+  end
 end
