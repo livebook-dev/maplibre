@@ -250,7 +250,7 @@ defmodule MapLibre do
     validade_layer!(ml, opts)
     labels = ml.spec["layers"] |> Enum.find_index(&(&1["type"] == "symbol"))
     layer = opts_to_ml_props(opts)
-    layers = List.insert_at(ml.spec["layers"], labels - 1, layer)
+    layers = List.insert_at(ml.spec["layers"], labels, layer)
     update_in(ml.spec, fn spec -> Map.put(spec, "layers", layers) end)
   end
 
