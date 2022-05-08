@@ -49,4 +49,34 @@ defmodule MapLibreTest do
       assert ml == %MapLibre{spec: %{"version" => 8}}
     end
   end
+
+  describe "add_source/3" do
+    test "raises an error when no source type is given" do
+      assert_raise ArgumentError, "source type is required", fn ->
+        Ml.new() |> Ml.add_source("invalid")
+      end
+    end
+
+    test "raises an error when a invalid source type is given" do
+      assert_raise ArgumentError,
+                   "unknown source type, expected one of :vector, :raster, :raster_dem, :geojson, :image, :video, got: :invalid",
+                   fn ->
+                     Ml.new() |> Ml.add_source("invalid", type: :invalid)
+                   end
+    end
+
+    test "adds a new source to the map" do
+      ml =
+        Ml.new()
+        |> Ml.add_source("urban-areas",
+          type: :geojson,
+          data:
+            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
+        )
+
+      source = ml.spec["sources"]["urban-areas"]
+      assert source
+      assert source["type"] == "geojson"
+    end
+  end
 end
