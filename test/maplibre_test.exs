@@ -111,4 +111,37 @@ defmodule MapLibreTest do
       assert layer["source"] == "maplibre"
     end
   end
+
+  describe "add_layer_below_labels/2" do
+    test "raises an error when no layer type is given" do
+      assert_raise ArgumentError, "layer type is required", fn ->
+        Ml.new() |> Ml.add_layer_below_labels(id: "invalid")
+      end
+    end
+
+    test "raises an error when an invalid layer type is given" do
+      assert_raise ArgumentError,
+                   "unknown layer type, expected one of :background, :fill, :line, :symbol, :raster, :circle, :fill_extrusion, :heatmap, :hillshade, got: :invalid",
+                   fn ->
+                     Ml.new() |> Ml.add_layer_below_labels(id: "invalid", type: :invalid)
+                   end
+    end
+
+    test "raises an error when the layer refers to a source that doesn't exist" do
+      assert_raise ArgumentError,
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_layer_below_labels(id: "invalid", type: :fill, source: "invalid")
+                   end
+    end
+
+    test "adds a new layer bellow the labels" do
+      ml = Ml.new() |> Ml.add_layer_below_labels(id: "maplibre", type: :fill, source: "maplibre")
+      first_labels_index = Enum.find_index(ml.spec["layers"], &(&1["type"] == "symbol"))
+      layer_index = Enum.find_index(ml.spec["layers"], &(&1["id"] == "maplibre"))
+      assert layer_index
+      assert layer_index == first_labels_index - 1
+    end
+  end
 end
