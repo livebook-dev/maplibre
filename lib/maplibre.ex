@@ -268,11 +268,25 @@ defmodule MapLibre do
   end
 
   defp validade_layer!(ml, opts) do
+    id = Keyword.get(opts, :id)
     type = Keyword.get(opts, :type)
     source = Keyword.get(opts, :source)
 
+    validate_layer_id!(ml, id)
     validate_layer_type!(type)
     if type != :background, do: validate_layer_source!(ml, source)
+  end
+
+  defp validate_layer_id!(_ml, nil) do
+    raise ArgumentError,
+          "layer id is required"
+  end
+
+  defp validate_layer_id!(ml, id) do
+    if Enum.find(ml.spec["layers"], &(&1["id"] == id)) do
+      raise ArgumentError,
+            "The #{inspect(id)} layer already exists on the map. If you want to update a layer, use the #{inspect("update_layer/3")} function instead"
+    end
   end
 
   defp validate_layer_type!(nil) do

@@ -81,6 +81,20 @@ defmodule MapLibreTest do
   end
 
   describe "add_layer/2" do
+    test "raises an error when no layer id is given" do
+      assert_raise ArgumentError, "layer id is required", fn ->
+        Ml.new() |> Ml.add_layer(type: :fill)
+      end
+    end
+
+    test "raises an error if the layer already exists" do
+      assert_raise ArgumentError,
+                   ~s(The "background" layer already exists on the map. If you want to update a layer, use the "update_layer/3" function instead),
+                   fn ->
+                     Ml.new() |> Ml.add_layer(id: "background")
+                   end
+    end
+
     test "raises an error when no layer type is given" do
       assert_raise ArgumentError, "layer type is required", fn ->
         Ml.new() |> Ml.add_layer(id: "invalid")
@@ -190,8 +204,7 @@ defmodule MapLibreTest do
     end
 
     test "updates metadata" do
-      ml =
-        Ml.new() |> Ml.metadata("meta:data", "example") |> Ml.metadata("meta:data", "updated")
+      ml = Ml.new() |> Ml.metadata("meta:data", "example") |> Ml.metadata("meta:data", "updated")
 
       assert ml.spec["metadata"]["meta:data"] == "updated"
     end
