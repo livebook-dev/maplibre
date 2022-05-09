@@ -179,6 +179,20 @@ defmodule MapLibreTest do
                      Ml.new() |> Ml.update_layer("invalid", type: :fill)
                    end
     end
+
+    test "raises an error if its updated to an invalid type" do
+      assert_raise ArgumentError,
+                   "unknown layer type, expected one of :background, :fill, :line, :symbol, :raster, :circle, :fill_extrusion, :heatmap, :hillshade, got: :invalid",
+                   fn -> Ml.new() |> Ml.update_layer("coastline", type: :invalid) end
+    end
+
+    test "raises an error if its updated to an invalid source" do
+      assert_raise ArgumentError,
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   fn ->
+                     Ml.new() |> Ml.update_layer("coastline", type: :fill, source: "invalid")
+                   end
+    end
   end
 
   test "light/2" do

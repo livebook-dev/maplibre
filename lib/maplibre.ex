@@ -261,7 +261,7 @@ defmodule MapLibre do
   def update_layer(%_{spec: %{"layers" => layers}} = ml, id, opts) do
     updated_fields = opts_to_ml_props(opts)
     index = Enum.find_index(layers, &(&1["id"] == id))
-    validate_layer_update!(index, id, layers)
+    validate_layer_update!(index, id, layers, ml, opts)
     updated_layer = layers |> Enum.at(index) |> Map.merge(updated_fields)
     updated_layers = List.replace_at(layers, index, updated_layer)
     update_in(ml.spec, fn spec -> Map.put(spec, "layers", updated_layers) end)
@@ -277,13 +277,18 @@ defmodule MapLibre do
     if type != :background, do: validate_layer_source!(ml, source)
   end
 
-  defp validate_layer_update!(index, id, layers) do
-    layers = Enum.map_join(layers, ", ", &inspect(&1["id"]))
-
+  defp validate_layer_update!(index, id, layers, ml, opts) do
     if index == nil do
+      layers = Enum.map_join(layers, ", ", &inspect(&1["id"]))
+
       raise ArgumentError,
             "layer #{inspect(id)} was not found. Current available layers are: #{layers}"
     end
+
+    type = Keyword.get(opts, :type)
+    source = Keyword.get(opts, :source)
+    if type, do: validate_layer_type!(type)
+    if source, do: validate_layer_source!(ml, source)
   end
 
   defp validate_layer_id!(_ml, nil) do
