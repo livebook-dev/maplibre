@@ -81,6 +81,20 @@ defmodule MapLibreTest do
   end
 
   describe "add_layer/2" do
+    test "raises an error when no layer id is given" do
+      assert_raise ArgumentError, "layer id is required", fn ->
+        Ml.new() |> Ml.add_layer(type: :fill)
+      end
+    end
+
+    test "raises an error if the layer already exists" do
+      assert_raise ArgumentError,
+                   ~s(The "background" layer already exists on the map. If you want to update a layer, use the "update_layer/3" function instead),
+                   fn ->
+                     Ml.new() |> Ml.add_layer(id: "background")
+                   end
+    end
+
     test "raises an error when no layer type is given" do
       assert_raise ArgumentError, "layer type is required", fn ->
         Ml.new() |> Ml.add_layer(id: "invalid")
@@ -157,6 +171,28 @@ defmodule MapLibreTest do
       assert layer["source"] == "maplibre"
       assert layer["paint"] == %{"fill-color" => "red"}
     end
+
+    test "raises an error if the given layer doesn't exist" do
+      assert_raise ArgumentError,
+                   ~s(layer "invalid" was not found. Current available layers are: "background", "coastline", "countries-fill", "countries-boundary", "geolines", "geolines-label", "countries-label"),
+                   fn ->
+                     Ml.new() |> Ml.update_layer("invalid", type: :fill)
+                   end
+    end
+
+    test "raises an error if updated to an invalid type" do
+      assert_raise ArgumentError,
+                   "unknown layer type, expected one of :background, :fill, :line, :symbol, :raster, :circle, :fill_extrusion, :heatmap, :hillshade, got: :invalid",
+                   fn -> Ml.new() |> Ml.update_layer("coastline", type: :invalid) end
+    end
+
+    test "raises an error if updated to an invalid source" do
+      assert_raise ArgumentError,
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   fn ->
+                     Ml.new() |> Ml.update_layer("coastline", type: :fill, source: "invalid")
+                   end
+    end
   end
 
   test "light/2" do
@@ -190,8 +226,7 @@ defmodule MapLibreTest do
     end
 
     test "updates metadata" do
-      ml =
-        Ml.new() |> Ml.metadata("meta:data", "example") |> Ml.metadata("meta:data", "updated")
+      ml = Ml.new() |> Ml.metadata("meta:data", "example") |> Ml.metadata("meta:data", "updated")
 
       assert ml.spec["metadata"]["meta:data"] == "updated"
     end
