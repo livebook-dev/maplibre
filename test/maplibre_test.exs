@@ -171,6 +171,14 @@ defmodule MapLibreTest do
       assert layer["source"] == "maplibre"
       assert layer["paint"] == %{"fill-color" => "red"}
     end
+
+    test "raises an error if the given layer doesn't exist" do
+      assert_raise ArgumentError,
+                   ~s(layer "invalid" was not found. Current available layers are: "background", "coastline", "countries-fill", "countries-boundary", "geolines", "geolines-label", "countries-label"),
+                   fn ->
+                     Ml.new() |> Ml.update_layer("invalid", type: :fill)
+                   end
+    end
   end
 
   test "light/2" do

@@ -246,25 +246,25 @@ defmodule MapLibre do
   Same as `add_layer/2` but puts the given layer immediately below the labels
   """
   @spec add_layer_below_labels(t(), keyword()) :: t()
-  def add_layer_below_labels(ml, opts) do
+  def add_layer_below_labels(%_{spec: %{"layers" => layers}} = ml, opts) do
     validade_layer!(ml, opts)
-    labels = ml.spec["layers"] |> Enum.find_index(&(&1["type"] == "symbol"))
+    labels = Enum.find_index(layers, &(&1["type"] == "symbol"))
     layer = opts_to_ml_props(opts)
-    layers = List.insert_at(ml.spec["layers"], labels, layer)
-    update_in(ml.spec, fn spec -> Map.put(spec, "layers", layers) end)
+    updated_layers = List.insert_at(layers, labels, layer)
+    update_in(ml.spec, fn spec -> Map.put(spec, "layers", updated_layers) end)
   end
 
   @doc """
   Updates a layer that was already defined in the specification
   """
   @spec update_layer(t(), String.t(), keyword()) :: t()
-  def update_layer(ml, layer_id, opts) do
+  def update_layer(%_{spec: %{"layers" => layers}} = ml, id, opts) do
     updated_fields = opts_to_ml_props(opts)
-    layers = ml.spec["layers"]
-    layer_index = layers |> Enum.find_index(&(&1["id"] == layer_id))
-    updated_layer = layers |> Enum.find(&(&1["id"] == layer_id)) |> Map.merge(updated_fields)
-    layers = List.replace_at(layers, layer_index, updated_layer)
-    update_in(ml.spec, fn spec -> Map.put(spec, "layers", layers) end)
+    index = Enum.find_index(layers, &(&1["id"] == id))
+    validate_layer_update!(index, id, layers)
+    updated_layer = layers |> Enum.at(index) |> Map.merge(updated_fields)
+    updated_layers = List.replace_at(layers, index, updated_layer)
+    update_in(ml.spec, fn spec -> Map.put(spec, "layers", updated_layers) end)
   end
 
   defp validade_layer!(ml, opts) do
@@ -275,6 +275,15 @@ defmodule MapLibre do
     validate_layer_id!(ml, id)
     validate_layer_type!(type)
     if type != :background, do: validate_layer_source!(ml, source)
+  end
+
+  defp validate_layer_update!(index, id, layers) do
+    layers = Enum.map_join(layers, ", ", &inspect(&1["id"]))
+
+    if index == nil do
+      raise ArgumentError,
+            "layer #{inspect(id)} was not found. Current available layers are: #{layers}"
+    end
   end
 
   defp validate_layer_id!(_ml, nil) do
