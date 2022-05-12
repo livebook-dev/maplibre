@@ -151,10 +151,17 @@ defmodule MapLibre do
   """
   @spec add_source(t(), String.t(), keyword()) :: t()
   def add_source(ml, source, opts \\ []) do
-    validate_source_type!(Keyword.get(opts, :type))
+    validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
     sources = Map.merge(ml.spec["sources"], source)
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  defp validate_source!(opts) do
+    type = Keyword.get(opts, :type)
+
+    validate_source_type!(type)
+    if type == :geojson, do: validate_geojson!(opts)
   end
 
   defp validate_source_type!(nil) do
@@ -170,6 +177,13 @@ defmodule MapLibre do
 
       raise ArgumentError,
             "unknown source type, expected one of #{types}, got: #{inspect(type)}"
+    end
+  end
+
+  defp validate_geojson!(opts) do
+    if !Keyword.get(opts, :data) do
+      raise ArgumentError,
+            ~s(The GeoJSON data must be given using the "data" property, whose value can be a URL or inline GeoJSON.)
     end
   end
 
