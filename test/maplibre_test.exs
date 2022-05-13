@@ -73,6 +73,14 @@ defmodule MapLibreTest do
                    end
     end
 
+    test "raises an error if a geojson with empty data is given" do
+      assert_raise ArgumentError,
+                   ~s(The GeoJSON data must be given using the "data" property, whose value can be a URL or inline GeoJSON.),
+                   fn ->
+                     Ml.new() |> Ml.add_source("invalid", type: :geojson, data: [])
+                   end
+    end
+
     test "adds a new source to the map" do
       ml =
         Ml.new()
