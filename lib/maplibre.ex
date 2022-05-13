@@ -151,10 +151,17 @@ defmodule MapLibre do
   """
   @spec add_source(t(), String.t(), keyword()) :: t()
   def add_source(ml, source, opts \\ []) do
-    validate_source_type!(Keyword.get(opts, :type))
+    validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
     sources = Map.merge(ml.spec["sources"], source)
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  defp validate_source!(opts) do
+    type = opts[:type]
+
+    validate_source_type!(type)
+    if type == :geojson, do: validate_geojson!(opts)
   end
 
   defp validate_source_type!(nil) do
@@ -170,6 +177,15 @@ defmodule MapLibre do
 
       raise ArgumentError,
             "unknown source type, expected one of #{types}, got: #{inspect(type)}"
+    end
+  end
+
+  defp validate_geojson!(opts) do
+    data = opts[:data]
+
+    if is_nil(data) || data == [] do
+      raise ArgumentError,
+            ~s(The GeoJSON data must be given using the "data" property, whose value can be a URL or inline GeoJSON.)
     end
   end
 
@@ -268,9 +284,9 @@ defmodule MapLibre do
   end
 
   defp validade_layer!(ml, opts) do
-    id = Keyword.get(opts, :id)
-    type = Keyword.get(opts, :type)
-    source = Keyword.get(opts, :source)
+    id = opts[:id]
+    type = opts[:type]
+    source = opts[:source]
 
     validate_layer_id!(ml, id)
     validate_layer_type!(type)
@@ -285,8 +301,8 @@ defmodule MapLibre do
             "layer #{inspect(id)} was not found. Current available layers are: #{layers}"
     end
 
-    type = Keyword.get(opts, :type)
-    source = Keyword.get(opts, :source)
+    type = opts[:type]
+    source = opts[:source]
     if type, do: validate_layer_type!(type)
     if source, do: validate_layer_source!(ml, source)
   end
