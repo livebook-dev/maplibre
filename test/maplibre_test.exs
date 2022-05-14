@@ -203,9 +203,13 @@ defmodule MapLibreTest do
     test "adds a new layer into the map" do
       ml = Ml.new() |> Ml.add_layer(id: "maplibre", type: :fill, source: "maplibre")
       layer = Enum.find(ml.spec["layers"], &(&1["id"] == "maplibre"))
-      assert layer
       assert layer["type"] == "fill"
       assert layer["source"] == "maplibre"
+    end
+
+    test "adds the first layer to an empty style" do
+      ml = Ml.new(style: %{}) |> Ml.add_layer(id: "background", type: :background)
+      assert ml.spec["layers"] == [%{"id" => "background", "type" => "background"}]
     end
   end
 
@@ -237,7 +241,6 @@ defmodule MapLibreTest do
       ml = Ml.new() |> Ml.add_layer_below_labels(id: "maplibre", type: :fill, source: "maplibre")
       first_labels_index = Enum.find_index(ml.spec["layers"], &(&1["type"] == "symbol"))
       layer_index = Enum.find_index(ml.spec["layers"], &(&1["id"] == "maplibre"))
-      assert layer_index
       assert layer_index == first_labels_index - 1
     end
   end
