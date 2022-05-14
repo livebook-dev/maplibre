@@ -134,6 +134,8 @@ defmodule MapLibre do
     ml.spec
   end
 
+  @compile {:no_warn_undefined, {Geo.JSON, :encode!, 2}}
+
   @doc """
   Adds a data source to the sources in the specification.
 
@@ -149,8 +151,17 @@ defmodule MapLibre do
 
   See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
   """
-  @spec add_source(t(), String.t(), keyword()) :: t()
-  def add_source(ml, source, opts \\ []) do
+  @spec add_source(t(), String.t(), struct() | keyword()) :: t()
+  def add_source(ml, source, opts \\ [])
+
+  def add_source(ml, source, %_{} = geom) do
+    data = Geo.JSON.encode!(geom, feature: true)
+    source = %{source => %{"type" => "geojson", "data" => data}}
+    sources = Map.merge(ml.spec["sources"], source)
+    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  def add_source(ml, source, opts) do
     validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
     sources = Map.merge(ml.spec["sources"], source)
