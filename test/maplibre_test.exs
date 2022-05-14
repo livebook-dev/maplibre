@@ -94,6 +94,64 @@ defmodule MapLibreTest do
       assert source
       assert source["type"] == "geojson"
     end
+
+    test "adds a Geo geometry as source to the map" do
+      geom = %Geo.LineString{
+        coordinates: [
+          {-122.48369693756104, 37.83381888486939},
+          {-122.48348236083984, 37.83317489144141}
+        ]
+      }
+
+      ml = Ml.new() |> Ml.add_source("route", geom)
+
+      source = ml.spec["sources"]["route"]
+      assert source
+      assert source["type"] == "geojson"
+    end
+
+    test "adds a Geo polygon as source to the map" do
+      geom = %Geo.Polygon{
+        coordinates: [
+          [
+            {-67.13734351262877, 45.137451890638886},
+            {-66.96466, 44.8097},
+            {-68.03252, 44.3252},
+            {-69.06, 43.98}
+          ]
+        ]
+      }
+
+      ml = Ml.new() |> Ml.add_source("maine", geom)
+
+      source = ml.spec["sources"]["maine"]
+      assert source
+      assert source["type"] == "geojson"
+    end
+
+    test "adds a Geo collection as source to the map" do
+      p1 = %Geo.Point{coordinates: {-121.415061, 40.506229}}
+      p2 = %Geo.Point{coordinates: {-121.505184, 40.488084}}
+      p3 = %Geo.Point{coordinates: {-121.354465, 40.488737}}
+
+      pl = %Geo.Polygon{
+        coordinates: [
+          [
+            {-121.353637, 40.584978},
+            {-121.284551, 40.584758},
+            {-121.275349, 40.541646}
+          ]
+        ]
+      }
+
+      gc = %Geo.GeometryCollection{geometries: [p1, p2, p3, pl]}
+
+      ml = Ml.new() |> Ml.add_source("national-park", gc)
+
+      source = ml.spec["sources"]["national-park"]
+      assert source
+      assert source["type"] == "geojson"
+    end
   end
 
   describe "add_layer/2" do
