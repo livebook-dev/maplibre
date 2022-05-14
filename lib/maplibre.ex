@@ -144,10 +144,23 @@ defmodule MapLibre do
 
   ## Examples
 
+      Ml.new()
       |> Ml.add_source("rwanda-provinces",
             type: :geojson,
             data: "https://maplibre.org/maplibre-gl-js-docs/assets/rwanda-provinces.geojson"
       )
+
+  For the `:geojson` type, integration with the [Geo](https://hexdocs.pm/geo/readme.html) package
+  is also provided and the type will be detected automatically.
+
+      geom = %Geo.LineString{coordinates: [
+        {-122.48369693756104, 37.83381888486939},
+        {-122.48348236083984, 37.83317489144141},
+        {-122.48339653015138, 37.83270036637107}
+      ]}
+
+      Ml.new()
+      |> Ml.add_source("route", geom)
 
   See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
   """
