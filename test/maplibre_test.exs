@@ -148,6 +148,19 @@ defmodule MapLibreTest do
       source = ml.spec["sources"]["national-park"]
       assert source["type"] == "geojson"
     end
+
+    test "adds the first source to an empty style" do
+      ml =
+        Ml.new(style: %{})
+        |> Ml.add_source("urban-areas",
+          type: :geojson,
+          data:
+            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
+        )
+
+      source = ml.spec["sources"]["urban-areas"]
+      assert source["type"] == "geojson"
+    end
   end
 
   describe "add_layer/2" do

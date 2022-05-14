@@ -170,14 +170,14 @@ defmodule MapLibre do
   def add_source(ml, source, %_{} = geom) do
     data = Geo.JSON.encode!(geom, feature: true)
     source = %{source => %{"type" => "geojson", "data" => data}}
-    sources = Map.merge(ml.spec["sources"], source)
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
 
   def add_source(ml, source, opts) do
     validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
-    sources = Map.merge(ml.spec["sources"], source)
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
 
