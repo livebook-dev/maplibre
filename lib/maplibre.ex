@@ -278,7 +278,7 @@ defmodule MapLibre do
   def add_layer(ml, opts) do
     validade_layer!(ml, opts)
     layer = opts_to_ml_props(opts)
-    layers = List.insert_at(ml.spec["layers"], -1, layer)
+    layers = if ml.spec["layers"], do: List.insert_at(ml.spec["layers"], -1, layer), else: [layer]
     update_in(ml.spec, fn spec -> Map.put(spec, "layers", layers) end)
   end
 
@@ -337,7 +337,7 @@ defmodule MapLibre do
   end
 
   defp validate_layer_id!(ml, id) do
-    if Enum.find(ml.spec["layers"], &(&1["id"] == id)) do
+    if ml.spec["layers"] && Enum.find(ml.spec["layers"], &(&1["id"] == id)) do
       raise ArgumentError,
             "The #{inspect(id)} layer already exists on the map. If you want to update a layer, use the #{inspect("update_layer/3")} function instead"
     end
