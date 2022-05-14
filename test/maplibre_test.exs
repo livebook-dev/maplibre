@@ -91,7 +91,6 @@ defmodule MapLibreTest do
         )
 
       source = ml.spec["sources"]["urban-areas"]
-      assert source
       assert source["type"] == "geojson"
     end
 
@@ -106,7 +105,6 @@ defmodule MapLibreTest do
       ml = Ml.new() |> Ml.add_source("route", geom)
 
       source = ml.spec["sources"]["route"]
-      assert source
       assert source["type"] == "geojson"
     end
 
@@ -125,7 +123,6 @@ defmodule MapLibreTest do
       ml = Ml.new() |> Ml.add_source("maine", geom)
 
       source = ml.spec["sources"]["maine"]
-      assert source
       assert source["type"] == "geojson"
     end
 
@@ -149,7 +146,6 @@ defmodule MapLibreTest do
       ml = Ml.new() |> Ml.add_source("national-park", gc)
 
       source = ml.spec["sources"]["national-park"]
-      assert source
       assert source["type"] == "geojson"
     end
   end
