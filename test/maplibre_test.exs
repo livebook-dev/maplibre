@@ -6,13 +6,13 @@ defmodule MapLibreTest do
   describe "new/1" do
     test "returns the initial default style" do
       ml = Ml.new() |> Ml.to_spec()
-      expected = Req.get!("https://demotiles.maplibre.org/style.json").body()
+      expected = "assets/style.json" |> File.read!() |> Jason.decode!()
       assert ml == expected
     end
 
     test "put the given options as properties into the style" do
       ml = Ml.new(center: {-74.5, 40}, zoom: 3)
-      assert ml.spec["name"] == "MapLibre"
+      assert ml.spec["name"] == "Livebook"
       assert ml.spec["center"] == [-74.5, 40]
       assert ml.spec["zoom"] == 3
     end

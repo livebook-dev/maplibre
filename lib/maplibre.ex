@@ -46,7 +46,7 @@ defmodule MapLibre do
 
   alias MapLibre.Utils
 
-  @default_style "https://demotiles.maplibre.org/style.json"
+  @default_style File.read!("assets/style.json")
   @to_kebab Utils.kebab_case_properties()
 
   defstruct spec: %{}
