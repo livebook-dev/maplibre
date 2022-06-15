@@ -535,18 +535,19 @@ defmodule MapLibre do
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
 
-  defp data_from_table(data, coordinates, _properties) do
+  defp data_from_table(data, {format, coordinates}, _properties) do
     geometries =
       data
       |> Table.to_columns(only: [coordinates])
       |> Map.get(coordinates)
-      |> Enum.map(&parse_coordinates/1)
+      |> Enum.map(&parse_coordinates(&1, format))
 
     Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
   end
 
-  defp parse_coordinates(coordinates) when is_binary(coordinates) do
-    [lat, lng] = String.split(coordinates, ", ")
-    %Geo.Point{coordinates: {lng, lat}}
+  defp parse_coordinates(coordinates, format) when is_binary(coordinates) do
+    [lng, lat] = String.split(coordinates, ", ")
+    coordinates = if format == "lng-lat", do: {lng, lat}, else: {lat, lng}
+    %Geo.Point{coordinates: coordinates}
   end
 end
