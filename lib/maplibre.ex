@@ -535,6 +535,17 @@ defmodule MapLibre do
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
 
+  defp data_from_table(data, {_format, [lng, lat]}, _properties) do
+    geometries =
+      data
+      |> Table.to_columns(only: [lng, lat])
+      |> Map.values()
+      |> Enum.zip()
+      |> Enum.map(& %Geo.Point{coordinates: &1})
+
+    Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
+  end
+
   defp data_from_table(data, {format, coordinates}, _properties) do
     geometries =
       data
