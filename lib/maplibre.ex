@@ -48,6 +48,7 @@ defmodule MapLibre do
 
   @default_style "https://demotiles.maplibre.org/style.json"
   @to_kebab Utils.kebab_case_properties()
+  @geometries [Geo.Point, Geo.LineString, Geo.Polygon, Geo.GeometryCollection]
 
   defstruct spec: %{}
 
@@ -167,7 +168,7 @@ defmodule MapLibre do
   @spec add_source(t(), String.t(), struct() | keyword()) :: t()
   def add_source(ml, source, opts \\ [])
 
-  def add_source(ml, source, %_{} = geom) do
+  def add_source(ml, source, %module{} = geom) when module in @geometries do
     data = Geo.JSON.encode!(geom, feature: true)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
@@ -177,6 +178,13 @@ defmodule MapLibre do
   def add_source(ml, source, opts) do
     validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
+    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  def add_source(ml, source, data, coordinates, properties \\ []) do
+    data = data_from_table(data, coordinates, properties)
+    source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
@@ -526,4 +534,19 @@ defmodule MapLibre do
   defp to_style(%{}), do: %{"version" => 8}
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
+
+  defp data_from_table(data, coordinates, _properties) do
+    geometries =
+      data
+      |> Table.to_columns(only: [coordinates])
+      |> Map.get(coordinates)
+      |> Enum.map(&parse_coordinates/1)
+
+    Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
+  end
+
+  defp parse_coordinates(coordinates) when is_binary(coordinates) do
+    [lat, lng] = String.split(coordinates, ", ")
+    %Geo.Point{coordinates: {lng, lat}}
+  end
 end

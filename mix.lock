@@ -15,5 +15,6 @@
   "nimble_parsec": {:hex, :nimble_parsec, "1.2.3", "244836e6e3f1200c7f30cb56733fd808744eca61fd182f731eac4af635cc6d0b", [:mix], [], "hexpm", "c8d789e39b9131acf7b99291e93dae60ab48ef14a7ee9d58c6964f59efb570b0"},
   "nimble_pool": {:hex, :nimble_pool, "0.2.6", "91f2f4c357da4c4a0a548286c84a3a28004f68f05609b4534526871a22053cde", [:mix], [], "hexpm", "1c715055095d3f2705c4e236c18b618420a35490da94149ff8b580a2144f653f"},
   "req": {:hex, :req, "0.2.2", "752840f3c30b7e3d048afdf20b2a9de976f89734b22a77f8595b8c956e29e85b", [:mix], [{:finch, "~> 0.9.0 or ~> 0.10.0 or ~> 0.11.0", [hex: :finch, repo: "hexpm", optional: false]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}, {:mime, "~> 1.6 or ~> 2.0", [hex: :mime, repo: "hexpm", optional: false]}, {:nimble_csv, "~> 1.0", [hex: :nimble_csv, repo: "hexpm", optional: true]}], "hexpm", "ff3c87f1ba32b483a2f923e0c885dbd9f8d57af98c2c8300c17542fa8884c5e4"},
+  "table": {:hex, :table, "0.1.1", "e8d3c75bb14b8dac227e17d85a626e695d96c271569e94e4a2d15494a7cb0b49", [:mix], [], "hexpm", "6a73280b2f5ad70474594feeb8c034ad490b97dbd5adaeb678f71c250cbc928c"},
   "telemetry": {:hex, :telemetry, "1.1.0", "a589817034a27eab11144ad24d5c0f9fab1f58173274b1e9bae7074af9cbee51", [:rebar3], [], "hexpm", "b727b2a1f75614774cff2d7565b64d0dfa5bd52ba517f16543e6fc7efcc0df48"},
 }
