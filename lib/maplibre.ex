@@ -183,6 +183,7 @@ defmodule MapLibre do
   end
 
   def add_source(ml, source, data, coordinates, properties \\ []) do
+    validate_data!(data)
     data = geometry_from_table(data, coordinates, properties)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
@@ -194,6 +195,10 @@ defmodule MapLibre do
 
     validate_source_type!(type)
     if type == :geojson, do: validate_geojson!(opts)
+  end
+
+  defp validate_data!(data) do
+    if !Table.Reader.impl_for(data), do: raise(ArgumentError, "unsupported data")
   end
 
   defp validate_source_type!(nil) do
