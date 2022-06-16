@@ -183,7 +183,7 @@ defmodule MapLibre do
   end
 
   def add_source(ml, source, data, coordinates, properties \\ []) do
-    data = data_from_table(data, coordinates, properties)
+    data = geometry_from_table(data, coordinates, properties)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
@@ -535,30 +535,58 @@ defmodule MapLibre do
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
 
-  defp data_from_table(data, {_format, [lng, lat]}, _properties) do
+  defp geometry_from_table(data, spec, []) do
     geometries =
       data
-      |> Table.to_columns(only: [lng, lat])
-      |> Map.values()
-      |> Enum.zip()
-      |> Enum.map(& %Geo.Point{coordinates: &1})
+      |> points(spec)
+      |> Enum.map(&%Geo.Point{coordinates: &1})
 
     Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
   end
 
-  defp data_from_table(data, {format, coordinates}, _properties) do
+  defp geometry_from_table(data, spec, properties) do
+    points = points(data, spec)
+    properties = properties(data, properties)
+    geometries = Enum.zip(points, properties)
+
     geometries =
-      data
-      |> Table.to_columns(only: [coordinates])
-      |> Map.get(coordinates)
-      |> Enum.map(&parse_coordinates(&1, format))
+      for {point, props} <- geometries, do: %Geo.Point{coordinates: point, properties: props}
 
     Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
   end
 
-  defp parse_coordinates(coordinates, format) when is_binary(coordinates) do
-    [lng, lat] = String.split(coordinates, ", ")
-    coordinates = if format == "lng-lat", do: {lng, lat}, else: {lat, lng}
-    %Geo.Point{coordinates: coordinates}
+  def points(data, {format, [lng, lat]}) do
+    data
+    |> Table.to_columns(only: [lng, lat])
+    |> then(&Enum.zip(&1[lng], &1[lat]))
+    |> Enum.map(&parse_coordinates(&1, format))
+  end
+
+  def points(data, {format, coordinates}) do
+    data
+    |> Table.to_columns(only: [coordinates])
+    |> Map.get(coordinates)
+    |> Enum.map(&parse_coordinates(&1, format))
+  end
+
+  defp properties(data, properties) do
+    for {label, column} <- properties do
+      data
+      |> Table.to_columns(only: [column])
+      |> Map.get(column)
+      |> Enum.map(&{label, &1})
+    end
+    |> Enum.zip_with(&Map.new/1)
+  end
+
+  defp parse_coordinates({lng, lat}, "lng-lat"), do: {lng, lat}
+  defp parse_coordinates({lng, lat}, "lat-lng"), do: {lat, lng}
+
+  defp parse_coordinates(coordinates, format) do
+    Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;]*\s*(?<lat>-?\d+\.?\d*)/, coordinates)
+    |> case do
+      %{"lat" => lat, "lng" => lng} -> if format == "lng-lat", do: {lng, lat}, else: {lat, lng}
+      _ -> raise ArgumentError, "unsupported coordinates format"
+    end
   end
 end
