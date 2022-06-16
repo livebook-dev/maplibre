@@ -220,6 +220,35 @@ defmodule MapLibreTest do
         Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
       end
     end
+
+    test "raises an error when the coordinates specification is not valid" do
+      columns = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      combined = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError, "unsupported coordinates format", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", columns, {:lng_lat, ["invalid"]})
+      end
+
+      assert_raise ArgumentError, "unsupported coordinates format", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", columns, {:lns_lat, ["latitude", "longitude"]})
+      end
+
+      assert_raise ArgumentError, "unsupported coordinates format", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", combined, {:lns_lat, "coordinates"})
+      end
+
+      assert_raise ArgumentError, "unsupported coordinates format", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", combined, {:lng_lat})
+      end
+    end
   end
 
   describe "add_layer/2" do

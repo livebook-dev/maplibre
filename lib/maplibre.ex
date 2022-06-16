@@ -223,7 +223,7 @@ defmodule MapLibre do
   """
   @spec add_table_source(t(), String.t(), term(), coordinates_spec(), list()) :: t()
   def add_table_source(ml, source, data, coordinates, properties \\ []) do
-    validate_data!(data)
+    validate_data!(data, coordinates)
     data = geometry_from_table(data, coordinates, properties)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
@@ -235,10 +235,6 @@ defmodule MapLibre do
 
     validate_source_type!(type)
     if type == :geojson, do: validate_geojson!(opts)
-  end
-
-  defp validate_data!(data) do
-    if !Table.Reader.impl_for(data), do: raise(ArgumentError, "unsupported data")
   end
 
   defp validate_source_type!(nil) do
@@ -263,6 +259,26 @@ defmodule MapLibre do
     if is_nil(data) || data == [] do
       raise ArgumentError,
             ~s(The GeoJSON data must be given using the "data" property, whose value can be a URL or inline GeoJSON.)
+    end
+  end
+
+  defp validate_data!(data, coordinates) do
+    if Table.Reader.impl_for(data),
+      do: validate_coordinates(coordinates),
+      else: raise(ArgumentError, "unsupported data")
+  end
+
+  defp validate_coordinates(coordinates) do
+    case coordinates do
+      {format, column} when format in [:lng_lat, :lat_lng] and is_binary(column) ->
+        nil
+
+      {format, [lng, lat | []]}
+      when format in [:lng_lat, :lat_lng] and is_binary(lng) and is_binary(lat) ->
+        nil
+
+      _ ->
+        raise(ArgumentError, "unsupported coordinates format")
     end
   end
 
