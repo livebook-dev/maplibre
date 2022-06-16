@@ -53,7 +53,7 @@ defmodule MapLibreTest do
   describe "add_source/3" do
     test "raises an error when no source type is given" do
       assert_raise ArgumentError, "source type is required", fn ->
-        Ml.new() |> Ml.add_source("invalid")
+        Ml.new() |> Ml.add_source("invalid", [])
       end
     end
 
@@ -94,6 +94,21 @@ defmodule MapLibreTest do
       assert source["type"] == "geojson"
     end
 
+    test "adds the first source to an empty style" do
+      ml =
+        Ml.new(style: %{})
+        |> Ml.add_source("urban-areas",
+          type: :geojson,
+          data:
+            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
+        )
+
+      source = ml.spec["sources"]["urban-areas"]
+      assert source["type"] == "geojson"
+    end
+  end
+
+  describe "add_geo_source/3" do
     test "adds a Geo geometry as source to the map" do
       geom = %Geo.LineString{
         coordinates: [
@@ -102,7 +117,7 @@ defmodule MapLibreTest do
         ]
       }
 
-      ml = Ml.new() |> Ml.add_source("route", geom)
+      ml = Ml.new() |> Ml.add_geo_source("route", geom)
 
       source = ml.spec["sources"]["route"]
       assert source["type"] == "geojson"
@@ -120,7 +135,7 @@ defmodule MapLibreTest do
         ]
       }
 
-      ml = Ml.new() |> Ml.add_source("maine", geom)
+      ml = Ml.new() |> Ml.add_geo_source("maine", geom)
 
       source = ml.spec["sources"]["maine"]
       assert source["type"] == "geojson"
@@ -143,22 +158,9 @@ defmodule MapLibreTest do
 
       gc = %Geo.GeometryCollection{geometries: [p1, p2, p3, pl]}
 
-      ml = Ml.new() |> Ml.add_source("national-park", gc)
+      ml = Ml.new() |> Ml.add_geo_source("national-park", gc)
 
       source = ml.spec["sources"]["national-park"]
-      assert source["type"] == "geojson"
-    end
-
-    test "adds the first source to an empty style" do
-      ml =
-        Ml.new(style: %{})
-        |> Ml.add_source("urban-areas",
-          type: :geojson,
-          data:
-            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
-        )
-
-      source = ml.spec["sources"]["urban-areas"]
       assert source["type"] == "geojson"
     end
   end

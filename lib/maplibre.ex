@@ -151,8 +151,21 @@ defmodule MapLibre do
             data: "https://maplibre.org/maplibre-gl-js-docs/assets/rwanda-provinces.geojson"
       )
 
-  For the `:geojson` type, integration with the [Geo](https://hexdocs.pm/geo/readme.html) package
-  is also provided and the type will be detected automatically.
+  See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
+  """
+  @spec add_source(t(), String.t(), keyword()) :: t()
+  def add_source(ml, source, opts) do
+    validate_source!(opts)
+    source = %{source => opts_to_ml_props(opts)}
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
+    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  @doc """
+  Adds a GEO data to the sources in the specification.
+
+  For the `:geojson` type, provides integration with the [Geo](https://hexdocs.pm/geo/readme.html)
+  package.
 
       geom = %Geo.LineString{coordinates: [
         {-122.48369693756104, 37.83381888486939},
@@ -161,28 +174,21 @@ defmodule MapLibre do
       ]}
 
       Ml.new()
-      |> Ml.add_source("route", geom)
-
-  See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
+      |> Ml.add_geo_source("route", geom)
   """
-  @spec add_source(t(), String.t(), struct() | keyword()) :: t()
-  def add_source(ml, source, opts \\ [])
-
-  def add_source(ml, source, %module{} = geom) when module in @geometries do
+  @spec add_geo_source(t(), String.t(), struct()) :: t()
+  def add_geo_source(ml, source, %module{} = geom) when module in @geometries do
     data = Geo.JSON.encode!(geom, feature: true)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
 
-  def add_source(ml, source, opts) do
-    validate_source!(opts)
-    source = %{source => opts_to_ml_props(opts)}
-    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
-    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
-  end
-
-  def add_source(ml, source, data, coordinates, properties \\ []) do
+  @doc """
+  Adds a tabular data to the sources in the specification.
+  """
+  @spec add_table_source(t(), String.t(), term(), tuple(), list()) :: t()
+  def add_table_source(ml, source, data, coordinates, properties \\ []) do
     validate_data!(data)
     data = geometry_from_table(data, coordinates, properties)
     source = %{source => %{"type" => "geojson", "data" => data}}
@@ -575,34 +581,18 @@ defmodule MapLibre do
   end
 
   defp properties(data, properties) do
-    if Keyword.keyword?(properties),
-      do: labeled_properties(data, properties),
-      else: unlabeled_properties(data, properties)
-  end
-
-  defp unlabeled_properties(data, properties) do
     data
     |> Table.to_rows(only: properties)
     |> Enum.to_list()
   end
 
-  def labeled_properties(data, properties) do
-    for {label, column} <- properties do
-      data
-      |> Table.to_columns(only: [column])
-      |> Map.get(column)
-      |> Enum.map(&{label, &1})
-    end
-    |> Enum.zip_with(&Map.new/1)
-  end
-
-  defp parse_coordinates({lng, lat}, "lng-lat"), do: {lng, lat}
-  defp parse_coordinates({lng, lat}, "lat-lng"), do: {lat, lng}
+  defp parse_coordinates({lng, lat}, :lng_lat), do: {lng, lat}
+  defp parse_coordinates({lng, lat}, :lat_lng), do: {lat, lng}
 
   defp parse_coordinates(coordinates, format) do
     Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;]*\s*(?<lat>-?\d+\.?\d*)/, coordinates)
     |> case do
-      %{"lat" => lat, "lng" => lng} -> if format == "lng-lat", do: {lng, lat}, else: {lat, lng}
+      %{"lat" => lat, "lng" => lng} -> if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
       _ -> raise ArgumentError, "unsupported coordinates format"
     end
   end
