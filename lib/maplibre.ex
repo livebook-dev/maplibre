@@ -570,6 +570,18 @@ defmodule MapLibre do
   end
 
   defp properties(data, properties) do
+    if Keyword.keyword?(properties),
+      do: labeled_properties(data, properties),
+      else: unlabeled_properties(data, properties)
+  end
+
+  defp unlabeled_properties(data, properties) do
+    data
+    |> Table.to_rows(only: properties)
+    |> Enum.to_list()
+  end
+
+  def labeled_properties(data, properties) do
     for {label, column} <- properties do
       data
       |> Table.to_columns(only: [column])
