@@ -165,6 +165,63 @@ defmodule MapLibreTest do
     end
   end
 
+  describe "add_table_source/5" do
+    test "adds tabular data as source to the map" do
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      ml =
+        Ml.new()
+        |> Ml.add_table_source("earthquakes", earthquakes, {:lat_lng, ["latitude", "longitude"]})
+
+      source = ml.spec["sources"]["earthquakes"]
+      assert source["type"] == "geojson"
+
+      assert List.first(source["data"]["features"]) == %{
+               "geometry" => %{"coordinates" => [101.8781, 32.3646], "type" => "Point"},
+               "properties" => %{},
+               "type" => "Feature"
+             }
+    end
+
+    test "adds tabular data as source to the map with properties" do
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      ml =
+        Ml.new()
+        |> Ml.add_table_source(
+          "earthquakes",
+          earthquakes,
+          {:lat_lng, ["latitude", "longitude"]},
+          ["mag"]
+        )
+
+      source = ml.spec["sources"]["earthquakes"]
+      assert source["type"] == "geojson"
+
+      assert List.first(source["data"]["features"]) == %{
+               "geometry" => %{"coordinates" => [101.8781, 32.3646], "type" => "Point"},
+               "properties" => %{"mag" => 5.9},
+               "type" => "Feature"
+             }
+    end
+
+    test "raises an error if the data does not implement the Table.Reader protocol" do
+      invalid = "not tabular data"
+
+      assert_raise ArgumentError, "unsupported data", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
+      end
+    end
+  end
+
   describe "add_layer/2" do
     test "raises an error when no layer id is given" do
       assert_raise ArgumentError, "layer id is required", fn ->
