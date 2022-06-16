@@ -640,10 +640,10 @@ defmodule MapLibre do
   defp parse_coordinates({lng, lat}, :lat_lng), do: {lat, lng}
 
   defp parse_coordinates(coordinates, format) do
-    Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;]*\s*(?<lat>-?\d+\.?\d*)/, coordinates)
+    Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;\s]\s*(?<lat>-?\d+\.?\d*)/, coordinates)
     |> case do
       %{"lat" => lat, "lng" => lng} -> if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
-      _ -> raise ArgumentError, "unsupported coordinates format"
+      _ -> raise ArgumentError, "unsupported coordinates data"
     end
   end
 end

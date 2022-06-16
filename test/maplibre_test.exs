@@ -249,6 +249,26 @@ defmodule MapLibreTest do
         Ml.new() |> Ml.add_table_source("invalid", combined, {:lng_lat})
       end
     end
+
+    test "raises an error when the coordinates data are not valid" do
+      invalid = %{
+        "coordinates" => ["invalid", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      missing_lat = %{
+        "coordinates" => ["32.3646", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError, "unsupported coordinates data", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"})
+      end
+
+      assert_raise ArgumentError, "unsupported coordinates data", fn ->
+        Ml.new() |> Ml.add_table_source("invalid", missing_lat, {:lng_lat, "coordinates"})
+      end
+    end
   end
 
   describe "add_layer/2" do
