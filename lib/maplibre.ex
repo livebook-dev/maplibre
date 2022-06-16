@@ -56,6 +56,14 @@ defmodule MapLibre do
 
   @type spec :: map()
 
+  @type coordinates_format :: :lng_lat | :lat_lng
+
+  @type coordinates_combined :: {coordinates_format(), column :: String.t()}
+
+  @type coordinates_columns :: {coordinates_format(), columns :: nonempty_list(String.t())}
+
+  @type coordinates_spec :: coordinates_combined() | coordinates_columns()
+
   @doc """
   Returns a style specification wrapped in the `MapLibre` struct. If you don't provide a initial
   style, the [default style](https://demotiles.maplibre.org/style.json) will be loaded for you. If
@@ -185,9 +193,35 @@ defmodule MapLibre do
   end
 
   @doc """
-  Adds a tabular data to the sources in the specification.
+  Adds points from tabular data to the sources in the specification.
+
+  For the `:geojson` type, provides integration with tabular data that implements the
+  [Table](https://hexdocs.pm/table/Table.html) protocol.
+
+  Supports data where the coordinates information is either in distinct columns or combined in a
+  single one. In both cases you need to provide the pattern followed by the coordinates data:
+  `:lng_lat` or `:lat_lng`
+
+  Properties are also supported as a list of columns in the last and optional argument.
+
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      Ml.new()
+      |> Ml.add_table_data("earthquakes", earthquakes, {:lng_lat, ["longitude", "latitude"]})
+
+      earthquakes = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      Ml.new()
+      |> Ml.add_table_data("earthquakes", earthquakes, {:lat_lng, "coordinates"}, ["mag"])
   """
-  @spec add_table_source(t(), String.t(), term(), tuple(), list()) :: t()
+  @spec add_table_source(t(), String.t(), term(), coordinates_spec(), list()) :: t()
   def add_table_source(ml, source, data, coordinates, properties \\ []) do
     validate_data!(data)
     data = geometry_from_table(data, coordinates, properties)
