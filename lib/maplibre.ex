@@ -662,9 +662,10 @@ defmodule MapLibre do
   end
 
   defp columns_for(data) do
-    with {_, %{columns: columns}, _} <- Table.Reader.init(data),
-         true <- Enum.all?(columns, &String.Chars.impl_for/1) do
-      Enum.map(columns, &to_string/1)
+    with {_, %{columns: columns}, _} <- Table.Reader.init(data) do
+      for column <- columns do
+        if is_atom(column), do: Atom.to_string(column), else: column
+      end
     else
       _ -> nil
     end
