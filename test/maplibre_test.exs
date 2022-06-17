@@ -269,6 +269,22 @@ defmodule MapLibreTest do
         Ml.new() |> Ml.add_table_source("invalid", missing_lat, {:lng_lat, "coordinates"})
       end
     end
+
+    test "raises an error when a missing column is provided" do
+      invalid = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError, ~s(column "invalid" was not found.), fn ->
+        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
+      end
+
+      assert_raise ArgumentError, ~s(column "invalid" was not found.), fn ->
+        Ml.new()
+        |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"}, ["invalid"])
+      end
+    end
   end
 
   describe "add_layer/2" do

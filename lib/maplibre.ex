@@ -617,6 +617,8 @@ defmodule MapLibre do
   end
 
   def points(data, {format, [lng, lat]}) do
+    validate_columns!(data, [lng, lat])
+
     data
     |> Table.to_columns(only: [lng, lat])
     |> then(&Enum.zip(&1[lng], &1[lat]))
@@ -624,6 +626,8 @@ defmodule MapLibre do
   end
 
   def points(data, {format, coordinates}) do
+    validate_columns!(data, [coordinates])
+
     data
     |> Table.to_columns(only: [coordinates])
     |> Map.get(coordinates)
@@ -631,6 +635,8 @@ defmodule MapLibre do
   end
 
   defp properties(data, properties) do
+    validate_columns!(data, properties)
+
     data
     |> Table.to_rows(only: properties)
     |> Enum.to_list()
@@ -644,6 +650,23 @@ defmodule MapLibre do
     |> case do
       %{"lat" => lat, "lng" => lng} -> if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
       _ -> raise ArgumentError, "unsupported coordinates data"
+    end
+  end
+
+  defp validate_columns!(data, columns) do
+    data_columns = columns_for(data)
+    missing_column = Enum.find(columns, &(&1 not in data_columns))
+
+    if missing_column,
+      do: raise(ArgumentError, "column #{inspect(missing_column)} was not found.")
+  end
+
+  defp columns_for(data) do
+    with {_, %{columns: columns}, _} <- Table.Reader.init(data),
+         true <- Enum.all?(columns, &String.Chars.impl_for/1) do
+      Enum.map(columns, &to_string/1)
+    else
+      _ -> nil
     end
   end
 end
