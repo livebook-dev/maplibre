@@ -53,7 +53,7 @@ defmodule MapLibreTest do
   describe "add_source/3" do
     test "raises an error when no source type is given" do
       assert_raise ArgumentError, "source type is required", fn ->
-        Ml.new() |> Ml.add_source("invalid")
+        Ml.new() |> Ml.add_source("invalid", [])
       end
     end
 
@@ -94,6 +94,21 @@ defmodule MapLibreTest do
       assert source["type"] == "geojson"
     end
 
+    test "adds the first source to an empty style" do
+      ml =
+        Ml.new(style: %{})
+        |> Ml.add_source("urban-areas",
+          type: :geojson,
+          data:
+            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
+        )
+
+      source = ml.spec["sources"]["urban-areas"]
+      assert source["type"] == "geojson"
+    end
+  end
+
+  describe "add_geo_source/3" do
     test "adds a Geo geometry as source to the map" do
       geom = %Geo.LineString{
         coordinates: [
@@ -102,7 +117,7 @@ defmodule MapLibreTest do
         ]
       }
 
-      ml = Ml.new() |> Ml.add_source("route", geom)
+      ml = Ml.new() |> Ml.add_geo_source("route", geom)
 
       source = ml.spec["sources"]["route"]
       assert source["type"] == "geojson"
@@ -120,7 +135,7 @@ defmodule MapLibreTest do
         ]
       }
 
-      ml = Ml.new() |> Ml.add_source("maine", geom)
+      ml = Ml.new() |> Ml.add_geo_source("maine", geom)
 
       source = ml.spec["sources"]["maine"]
       assert source["type"] == "geojson"
@@ -143,23 +158,144 @@ defmodule MapLibreTest do
 
       gc = %Geo.GeometryCollection{geometries: [p1, p2, p3, pl]}
 
-      ml = Ml.new() |> Ml.add_source("national-park", gc)
+      ml = Ml.new() |> Ml.add_geo_source("national-park", gc)
 
       source = ml.spec["sources"]["national-park"]
       assert source["type"] == "geojson"
     end
+  end
 
-    test "adds the first source to an empty style" do
+  describe "add_table_source/5" do
+    test "adds tabular data as source to the map" do
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
       ml =
-        Ml.new(style: %{})
-        |> Ml.add_source("urban-areas",
-          type: :geojson,
-          data:
-            "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_urban_areas.geojson"
+        Ml.new()
+        |> Ml.add_table_source("earthquakes", earthquakes, {:lat_lng, ["latitude", "longitude"]})
+
+      source = ml.spec["sources"]["earthquakes"]
+      assert source["type"] == "geojson"
+
+      assert List.first(source["data"]["features"]) == %{
+               "geometry" => %{"coordinates" => [101.8781, 32.3646], "type" => "Point"},
+               "properties" => %{},
+               "type" => "Feature"
+             }
+    end
+
+    test "adds tabular data as source to the map with properties" do
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      ml =
+        Ml.new()
+        |> Ml.add_table_source(
+          "earthquakes",
+          earthquakes,
+          {:lat_lng, ["latitude", "longitude"]},
+          ["mag"]
         )
 
-      source = ml.spec["sources"]["urban-areas"]
+      source = ml.spec["sources"]["earthquakes"]
       assert source["type"] == "geojson"
+
+      assert List.first(source["data"]["features"]) == %{
+               "geometry" => %{"coordinates" => [101.8781, 32.3646], "type" => "Point"},
+               "properties" => %{"mag" => 5.9},
+               "type" => "Feature"
+             }
+    end
+
+    test "raises an error when the coordinates specification is not valid" do
+      columns = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      combined = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new() |> Ml.add_table_source("invalid", columns, {:lng_lat, ["invalid"]})
+                   end
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source(
+                       "invalid",
+                       columns,
+                       {:lns_lat, ["latitude", "longitude"]}
+                     )
+                   end
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", combined, {:lns_lat, "coordinates"})
+                   end
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new() |> Ml.add_table_source("invalid", combined, {:lng_lat})
+                   end
+    end
+
+    test "raises an error when the coordinates data are not valid" do
+      invalid = %{
+        "coordinates" => ["invalid", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      missing_lat = %{
+        "coordinates" => ["32.3646", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"})
+                   end
+
+      assert_raise ArgumentError,
+                   "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", missing_lat, {:lng_lat, "coordinates"})
+                   end
+    end
+
+    test "raises an error when a missing column is provided" do
+      invalid = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      assert_raise ArgumentError, ~s(column "invalid" was not found), fn ->
+        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
+      end
+
+      assert_raise ArgumentError, ~s(column "invalid" was not found), fn ->
+        Ml.new()
+        |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"}, ["invalid"])
+      end
     end
   end
 

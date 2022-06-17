@@ -48,12 +48,21 @@ defmodule MapLibre do
 
   @default_style "https://demotiles.maplibre.org/style.json"
   @to_kebab Utils.kebab_case_properties()
+  @geometries [Geo.Point, Geo.LineString, Geo.Polygon, Geo.GeometryCollection]
 
   defstruct spec: %{}
 
   @type t() :: %__MODULE__{spec: spec()}
 
   @type spec :: map()
+
+  @type coordinates_format :: :lng_lat | :lat_lng
+
+  @type coordinates_combined :: {coordinates_format(), column :: String.t()}
+
+  @type coordinates_columns :: {coordinates_format(), columns :: nonempty_list(String.t())}
+
+  @type coordinates_spec :: coordinates_combined() | coordinates_columns()
 
   @doc """
   Returns a style specification wrapped in the `MapLibre` struct. If you don't provide a initial
@@ -150,8 +159,21 @@ defmodule MapLibre do
             data: "https://maplibre.org/maplibre-gl-js-docs/assets/rwanda-provinces.geojson"
       )
 
-  For the `:geojson` type, integration with the [Geo](https://hexdocs.pm/geo/readme.html) package
-  is also provided and the type will be detected automatically.
+  See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
+  """
+  @spec add_source(t(), String.t(), keyword()) :: t()
+  def add_source(ml, source, opts) do
+    validate_source!(opts)
+    source = %{source => opts_to_ml_props(opts)}
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
+    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+  end
+
+  @doc """
+  Adds a GEO data to the sources in the specification.
+
+  For the `:geojson` type, provides integration with the [Geo](https://hexdocs.pm/geo/readme.html)
+  package.
 
       geom = %Geo.LineString{coordinates: [
         {-122.48369693756104, 37.83381888486939},
@@ -160,23 +182,50 @@ defmodule MapLibre do
       ]}
 
       Ml.new()
-      |> Ml.add_source("route", geom)
-
-  See [the docs](https://maplibre.org/maplibre-gl-js-docs/style-spec/sources/) for more details.
+      |> Ml.add_geo_source("route", geom)
   """
-  @spec add_source(t(), String.t(), struct() | keyword()) :: t()
-  def add_source(ml, source, opts \\ [])
-
-  def add_source(ml, source, %_{} = geom) do
+  @spec add_geo_source(t(), String.t(), struct()) :: t()
+  def add_geo_source(ml, source, %module{} = geom) when module in @geometries do
     data = Geo.JSON.encode!(geom, feature: true)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
 
-  def add_source(ml, source, opts) do
-    validate_source!(opts)
-    source = %{source => opts_to_ml_props(opts)}
+  @doc """
+  Adds points from tabular data to the sources in the specification.
+
+  For the `:geojson` type, provides integration with tabular data that implements the
+  [Table](https://hexdocs.pm/table/Table.html) protocol.
+
+  Supports data where the coordinates information is either in distinct columns or combined in a
+  single one. In both cases you need to provide the pattern followed by the coordinates data:
+  `:lng_lat` or `:lat_lng`
+
+  Properties are also supported as a list of columns in the last and optional argument.
+
+      earthquakes = %{
+        "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
+        "longitude" => [101.8781, 101.8413, -71.2103, 178.2851, 148.6945],
+        "mag" => [5.9, 5.6, 6.5, 6.3, 6.4]
+      }
+
+      Ml.new()
+      |> Ml.add_table_data("earthquakes", earthquakes, {:lng_lat, ["longitude", "latitude"]})
+
+      earthquakes = %{
+        "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
+        "mag" => [5.9, 5.6, 6.5]
+      }
+
+      Ml.new()
+      |> Ml.add_table_data("earthquakes", earthquakes, {:lat_lng, "coordinates"}, ["mag"])
+  """
+  @spec add_table_source(t(), String.t(), term(), coordinates_spec(), list()) :: t()
+  def add_table_source(ml, source, data, coordinates, properties \\ []) do
+    validate_coordinates!(coordinates)
+    data = geometry_from_table(data, coordinates, properties)
+    source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
@@ -210,6 +259,23 @@ defmodule MapLibre do
     if is_nil(data) || data == [] do
       raise ArgumentError,
             ~s(The GeoJSON data must be given using the "data" property, whose value can be a URL or inline GeoJSON.)
+    end
+  end
+
+  defp validate_coordinates!(coordinates) do
+    case coordinates do
+      {format, column} when format in [:lng_lat, :lat_lng] and is_binary(column) ->
+        nil
+
+      {format, [lng, lat]}
+      when format in [:lng_lat, :lat_lng] and is_binary(lng) and is_binary(lat) ->
+        nil
+
+      _ ->
+        raise(
+          ArgumentError,
+          "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates"
+        )
     end
   end
 
@@ -526,4 +592,81 @@ defmodule MapLibre do
   defp to_style(%{}), do: %{"version" => 8}
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
+
+  defp geometry_from_table(data, spec, []) do
+    geometries =
+      data
+      |> points(spec)
+      |> Enum.map(&%Geo.Point{coordinates: &1})
+
+    Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
+  end
+
+  defp geometry_from_table(data, spec, properties) do
+    points = points(data, spec)
+    properties = properties(data, properties)
+    geometries = Enum.zip(points, properties)
+
+    geometries =
+      for {point, props} <- geometries, do: %Geo.Point{coordinates: point, properties: props}
+
+    Geo.JSON.encode!(%Geo.GeometryCollection{geometries: geometries}, feature: true)
+  end
+
+  def points(data, {format, [lng, lat]}) do
+    validate_columns!(data, [lng, lat])
+
+    table = Table.to_columns(data, only: [lng, lat])
+    Enum.zip_with(table[lng], table[lat], &parse_coordinates({&1, &2}, format))
+  end
+
+  def points(data, {format, coordinates}) do
+    validate_columns!(data, [coordinates])
+
+    data
+    |> Table.to_columns(only: [coordinates])
+    |> Map.get(coordinates)
+    |> Enum.map(&parse_coordinates(&1, format))
+  end
+
+  defp properties(data, properties) do
+    validate_columns!(data, properties)
+
+    data
+    |> Table.to_rows(only: properties)
+    |> Enum.to_list()
+  end
+
+  defp parse_coordinates({lng, lat}, :lng_lat), do: {lng, lat}
+  defp parse_coordinates({lng, lat}, :lat_lng), do: {lat, lng}
+
+  defp parse_coordinates(coordinates, format) do
+    Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;\s]\s*(?<lat>-?\d+\.?\d*)/, coordinates)
+    |> case do
+      %{"lat" => lat, "lng" => lng} ->
+        if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
+
+      _ ->
+        raise ArgumentError,
+              "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space"
+    end
+  end
+
+  defp validate_columns!(data, columns) do
+    data_columns = columns_for(data)
+    missing_column = Enum.find(columns, &(&1 not in data_columns))
+
+    if missing_column,
+      do: raise(ArgumentError, "column #{inspect(missing_column)} was not found")
+  end
+
+  defp columns_for(data) do
+    with {_, %{columns: columns}, _} <- Table.Reader.init(data) do
+      for column <- columns do
+        if is_atom(column), do: Atom.to_string(column), else: column
+      end
+    else
+      _ -> nil
+    end
+  end
 end
