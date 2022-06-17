@@ -273,7 +273,7 @@ defmodule MapLibre do
       {format, column} when format in [:lng_lat, :lat_lng] and is_binary(column) ->
         nil
 
-      {format, [lng, lat | []]}
+      {format, [lng, lat]}
       when format in [:lng_lat, :lat_lng] and is_binary(lng) and is_binary(lat) ->
         nil
 
