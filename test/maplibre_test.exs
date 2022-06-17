@@ -213,14 +213,6 @@ defmodule MapLibreTest do
              }
     end
 
-    test "raises an error if the data does not implement the Table.Reader protocol" do
-      invalid = "not tabular data"
-
-      assert_raise ArgumentError, "unsupported data", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
-      end
-    end
-
     test "raises an error when the coordinates specification is not valid" do
       columns = %{
         "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
@@ -233,21 +225,35 @@ defmodule MapLibreTest do
         "mag" => [5.9, 5.6, 6.5]
       }
 
-      assert_raise ArgumentError, "unsupported coordinates format", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", columns, {:lng_lat, ["invalid"]})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new() |> Ml.add_table_source("invalid", columns, {:lng_lat, ["invalid"]})
+                   end
 
-      assert_raise ArgumentError, "unsupported coordinates format", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", columns, {:lns_lat, ["latitude", "longitude"]})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source(
+                       "invalid",
+                       columns,
+                       {:lns_lat, ["latitude", "longitude"]}
+                     )
+                   end
 
-      assert_raise ArgumentError, "unsupported coordinates format", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", combined, {:lns_lat, "coordinates"})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", combined, {:lns_lat, "coordinates"})
+                   end
 
-      assert_raise ArgumentError, "unsupported coordinates format", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", combined, {:lng_lat})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates",
+                   fn ->
+                     Ml.new() |> Ml.add_table_source("invalid", combined, {:lng_lat})
+                   end
     end
 
     test "raises an error when the coordinates data are not valid" do
@@ -261,13 +267,19 @@ defmodule MapLibreTest do
         "mag" => [5.9, 5.6, 6.5]
       }
 
-      assert_raise ArgumentError, "unsupported coordinates data", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"})
+                   end
 
-      assert_raise ArgumentError, "unsupported coordinates data", fn ->
-        Ml.new() |> Ml.add_table_source("invalid", missing_lat, {:lng_lat, "coordinates"})
-      end
+      assert_raise ArgumentError,
+                   "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space",
+                   fn ->
+                     Ml.new()
+                     |> Ml.add_table_source("invalid", missing_lat, {:lng_lat, "coordinates"})
+                   end
     end
 
     test "raises an error when a missing column is provided" do
@@ -276,11 +288,11 @@ defmodule MapLibreTest do
         "mag" => [5.9, 5.6, 6.5]
       }
 
-      assert_raise ArgumentError, ~s(column "invalid" was not found.), fn ->
+      assert_raise ArgumentError, ~s(column "invalid" was not found), fn ->
         Ml.new() |> Ml.add_table_source("invalid", invalid, {:lng_lat, "invalid"})
       end
 
-      assert_raise ArgumentError, ~s(column "invalid" was not found.), fn ->
+      assert_raise ArgumentError, ~s(column "invalid" was not found), fn ->
         Ml.new()
         |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"}, ["invalid"])
       end

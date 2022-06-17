@@ -223,7 +223,7 @@ defmodule MapLibre do
   """
   @spec add_table_source(t(), String.t(), term(), coordinates_spec(), list()) :: t()
   def add_table_source(ml, source, data, coordinates, properties \\ []) do
-    validate_data!(data, coordinates)
+    validate_coordinates!(coordinates)
     data = geometry_from_table(data, coordinates, properties)
     source = %{source => %{"type" => "geojson", "data" => data}}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
@@ -262,13 +262,7 @@ defmodule MapLibre do
     end
   end
 
-  defp validate_data!(data, coordinates) do
-    if Table.Reader.impl_for(data),
-      do: validate_coordinates(coordinates),
-      else: raise(ArgumentError, "unsupported data")
-  end
-
-  defp validate_coordinates(coordinates) do
+  defp validate_coordinates!(coordinates) do
     case coordinates do
       {format, column} when format in [:lng_lat, :lat_lng] and is_binary(column) ->
         nil
@@ -278,7 +272,10 @@ defmodule MapLibre do
         nil
 
       _ ->
-        raise(ArgumentError, "unsupported coordinates format")
+        raise(
+          ArgumentError,
+          "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates"
+        )
     end
   end
 
@@ -619,10 +616,8 @@ defmodule MapLibre do
   def points(data, {format, [lng, lat]}) do
     validate_columns!(data, [lng, lat])
 
-    data
-    |> Table.to_columns(only: [lng, lat])
-    |> then(&Enum.zip(&1[lng], &1[lat]))
-    |> Enum.map(&parse_coordinates(&1, format))
+    table = Table.to_columns(data, only: [lng, lat])
+    Enum.zip_with(table[lng], table[lat], &parse_coordinates({&1, &2}, format))
   end
 
   def points(data, {format, coordinates}) do
@@ -648,8 +643,12 @@ defmodule MapLibre do
   defp parse_coordinates(coordinates, format) do
     Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;\s]\s*(?<lat>-?\d+\.?\d*)/, coordinates)
     |> case do
-      %{"lat" => lat, "lng" => lng} -> if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
-      _ -> raise ArgumentError, "unsupported coordinates data"
+      %{"lat" => lat, "lng" => lng} ->
+        if format == :lng_lat, do: {lng, lat}, else: {lat, lng}
+
+      _ ->
+        raise ArgumentError,
+              "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space"
     end
   end
 
@@ -658,7 +657,7 @@ defmodule MapLibre do
     missing_column = Enum.find(columns, &(&1 not in data_columns))
 
     if missing_column,
-      do: raise(ArgumentError, "column #{inspect(missing_column)} was not found.")
+      do: raise(ArgumentError, "column #{inspect(missing_column)} was not found")
   end
 
   defp columns_for(data) do
