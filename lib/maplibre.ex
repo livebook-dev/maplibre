@@ -640,7 +640,7 @@ defmodule MapLibre do
   defp parse_coordinates({lng, lat}, :lng_lat), do: {lng, lat}
   defp parse_coordinates({lng, lat}, :lat_lng), do: {lat, lng}
 
-  defp parse_coordinates(coordinates, format) do
+  defp parse_coordinates(coordinates, format) when is_binary(coordinates) do
     Regex.named_captures(~r/(?<lng>-?\d+\.?\d*)\s*[,;\s]\s*(?<lat>-?\d+\.?\d*)/, coordinates)
     |> case do
       %{"lat" => lat, "lng" => lng} ->
@@ -650,6 +650,11 @@ defmodule MapLibre do
         raise ArgumentError,
               "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space"
     end
+  end
+
+  defp parse_coordinates(_, _) do
+    raise ArgumentError,
+          "unsupported coordinates data, expected it two contain two numbers separated by comma (,), colon (;) or space"
   end
 
   defp validate_columns!(data, columns) do
