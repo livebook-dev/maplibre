@@ -38,7 +38,7 @@ defmodule MapLibre.MixProject do
   defp docs do
     [
       main: "MapLibre",
-      source_url: "https://github.com/cristineguadelupe/maplibre",
+      source_url: "https://github.com/livebook-dev/maplibre",
       source_ref: "v#{@version}"
     ]
   end
