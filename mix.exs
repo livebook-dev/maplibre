@@ -13,18 +13,17 @@ defmodule MapLibre.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      package: package()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:jason, "~> 1.3"},
@@ -40,6 +39,15 @@ defmodule MapLibre.MixProject do
       main: "MapLibre",
       source_url: "https://github.com/livebook-dev/maplibre",
       source_ref: "v#{@version}"
+    ]
+  end
+
+  def package do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => "https://github.com/livebook-dev/maplibre"
+      }
     ]
   end
 end
