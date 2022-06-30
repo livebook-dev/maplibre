@@ -143,8 +143,6 @@ defmodule MapLibre do
     ml.spec
   end
 
-  @compile {:no_warn_undefined, {Geo.JSON, :encode!, 2}}
-
   @doc """
   Adds a data source to the sources in the specification.
 
@@ -184,10 +182,11 @@ defmodule MapLibre do
       Ml.new()
       |> Ml.add_geo_source("route", geom)
   """
-  @spec add_geo_source(t(), String.t(), struct()) :: t()
-  def add_geo_source(ml, source, %module{} = geom) when module in @geometries do
+  @spec add_geo_source(t(), String.t(), struct(), keyword()) :: t()
+  def add_geo_source(ml, source, %module{} = geom, opts \\ []) when module in @geometries do
     data = Geo.JSON.encode!(geom, feature: true)
-    source = %{source => %{"type" => "geojson", "data" => data}}
+    source_props = opts_to_ml_props(opts) |> Map.merge(%{"type" => "geojson", "data" => data})
+    source = %{source => source_props}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
@@ -202,7 +201,7 @@ defmodule MapLibre do
   single one. In both cases you need to provide the pattern followed by the coordinates data:
   `:lng_lat` or `:lat_lng`
 
-  Properties are also supported as a list of columns in the last and optional argument.
+  Properties are also supported as a list of columns in the options.
 
       earthquakes = %{
         "latitude" => [32.3646, 32.3357, -9.0665, 52.0779, -57.7326],
@@ -219,13 +218,21 @@ defmodule MapLibre do
       }
 
       Ml.new()
-      |> Ml.add_table_data("earthquakes", earthquakes, {:lat_lng, "coordinates"}, ["mag"])
+      |> Ml.add_table_data("earthquakes", earthquakes, {:lat_lng, "coordinates"}, properties: ["mag"])
   """
-  @spec add_table_source(t(), String.t(), term(), coordinates_spec(), list()) :: t()
-  def add_table_source(ml, source, data, coordinates, properties \\ []) do
+  @spec add_table_source(t(), String.t(), term(), coordinates_spec(), keyword()) :: t()
+  def add_table_source(ml, source, data, coordinates, opts \\ []) do
     validate_coordinates!(coordinates)
+    properties = Keyword.get(opts, :properties, [])
     data = geometry_from_table(data, coordinates, properties)
-    source = %{source => %{"type" => "geojson", "data" => data}}
+
+    source_props =
+      opts
+      |> Keyword.delete(:properties)
+      |> opts_to_ml_props()
+      |> Map.merge(%{"type" => "geojson", "data" => data})
+
+    source = %{source => source_props}
     sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
     update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
