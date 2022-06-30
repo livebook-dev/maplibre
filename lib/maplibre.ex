@@ -588,7 +588,7 @@ defmodule MapLibre do
     Enum.join([String.downcase(part, :ascii) | Enum.map(parts, &String.capitalize(&1, :ascii))])
   end
 
-  defp to_style("http" <> _rest = style), do: Req.get!(style).body
+  defp to_style("http" <> _rest = style), do: Req.get!(style, http_errors: :raise).body
   defp to_style(%{}), do: %{"version" => 8}
   defp to_style(style) when is_map(style), do: style
   defp to_style(style), do: Jason.decode!(style)
