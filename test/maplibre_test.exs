@@ -200,7 +200,7 @@ defmodule MapLibreTest do
           "earthquakes",
           earthquakes,
           {:lat_lng, ["latitude", "longitude"]},
-          ["mag"]
+          properties: ["mag"]
         )
 
       source = ml.spec["sources"]["earthquakes"]
@@ -294,7 +294,9 @@ defmodule MapLibreTest do
 
       assert_raise ArgumentError, ~s(column "invalid" was not found), fn ->
         Ml.new()
-        |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"}, ["invalid"])
+        |> Ml.add_table_source("invalid", invalid, {:lng_lat, "coordinates"},
+          properties: ["invalid"]
+        )
       end
     end
   end
