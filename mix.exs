@@ -28,7 +28,6 @@ defmodule MapLibre.MixProject do
     [
       {:table, "~> 0.1.0"},
       {:geo, "~> 3.4"},
-      {:jason, "~> 1.3", optional: true},
       {:req, "~> 0.3.0", optional: true},
       {:ex_doc, "~> 0.28", only: :dev, runtime: false}
     ]

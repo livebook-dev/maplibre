@@ -607,11 +607,6 @@ defmodule MapLibre do
     Req.get!(style, http_errors: :raise).body
   end
 
-  defp to_style(style) do
-    Utils.assert_jason!()
-    Jason.decode!(style)
-  end
-
   defp geometry_from_table(data, spec, []) do
     geometries =
       data
