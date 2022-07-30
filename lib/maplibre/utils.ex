@@ -158,4 +158,38 @@ defmodule MapLibre.Utils do
   def kebab_case_properties() do
     @kebab_case_properties |> Map.values() |> List.flatten()
   end
+
+  @doc """
+  Ensures `Jason` is available and raises an error otherwise.
+  """
+  def assert_jason!() do
+    unless Code.ensure_loaded?(Jason) do
+      raise RuntimeError, """
+      to use styles from a json file you need the :jason package.
+
+      You can install it by adding
+
+          {:jason, "~> 1.3"}
+
+      to your dependency list.
+      """
+    end
+  end
+
+  @doc """
+  Ensures `Req` is available and raises an error otherwise.
+  """
+  def assert_req!() do
+    unless Code.ensure_loaded?(Req) do
+      raise RuntimeError, """
+      to use styles from a url you need the :req package.
+
+      You can install it by adding
+
+          {:req, "~> 0.3.0"}
+
+      to your dependency list.
+      """
+    end
+  end
 end

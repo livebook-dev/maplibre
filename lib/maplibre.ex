@@ -595,11 +595,22 @@ defmodule MapLibre do
     Enum.join([String.downcase(part, :ascii) | Enum.map(parts, &String.capitalize(&1, :ascii))])
   end
 
-  defp to_style("http" <> _rest = style), do: Req.get!(style, http_errors: :raise).body
+  @compile {:no_warn_undefined, {Jason, :decode!, 1}}
+  @compile {:no_warn_undefined, {Req, :get!, 2}}
+
   defp to_style(%{}), do: %{"version" => 8}
   defp to_style(style) when is_atom(style), do: Styles.style(style)
   defp to_style(style) when is_map(style), do: style
-  defp to_style(style), do: Jason.decode!(style)
+
+  defp to_style("http" <> _rest = style) do
+    Utils.assert_req!()
+    Req.get!(style, http_errors: :raise).body
+  end
+
+  defp to_style(style) do
+    Utils.assert_jason!()
+    Jason.decode!(style)
+  end
 
   defp geometry_from_table(data, spec, []) do
     geometries =
