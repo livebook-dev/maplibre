@@ -4117,7 +4117,14 @@ defmodule MapLibre.Styles do
     "zoom" => 1
   }
 
+  def style(:default), do: @default
   def style(:street), do: @street
   def style(:terrain), do: @terrain
-  def style(_), do: @default
+
+  def style(style),
+    do:
+      raise(
+        ArgumentError,
+        "unknown style #{inspect(style)}, the available styles are :default, :terrain and :street"
+      )
 end
