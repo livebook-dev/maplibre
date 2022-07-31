@@ -595,7 +595,6 @@ defmodule MapLibre do
     Enum.join([String.downcase(part, :ascii) | Enum.map(parts, &String.capitalize(&1, :ascii))])
   end
 
-  @compile {:no_warn_undefined, {Jason, :decode!, 1}}
   @compile {:no_warn_undefined, {Req, :get!, 2}}
 
   defp to_style(%{}), do: %{"version" => 8}
