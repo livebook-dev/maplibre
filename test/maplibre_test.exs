@@ -6,7 +6,7 @@ defmodule MapLibreTest do
   describe "new/1" do
     test "returns the initial default style" do
       ml = Ml.new() |> Ml.to_spec()
-      expected = Req.get!("https://demotiles.maplibre.org/style.json").body()
+      expected = MapLibre.Styles.style(:default)
       assert ml == expected
     end
 
@@ -18,19 +18,13 @@ defmodule MapLibreTest do
     end
 
     test "loads a custom style" do
-      street_style =
-        "https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
-
-      ml = Ml.new(style: street_style) |> Ml.to_spec()
-      expected = Req.get!(street_style).body()
+      ml = Ml.new(style: :street) |> Ml.to_spec()
+      expected = MapLibre.Styles.style(:street)
       assert ml == expected
     end
 
     test "put the given options as properties into a custom style" do
-      terrain_style =
-        "https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
-
-      ml = Ml.new(style: terrain_style, center: {-74.5, 40}, zoom: 3)
+      ml = Ml.new(style: :terrain, center: {-74.5, 40}, zoom: 3)
       assert ml.spec["name"] == "Satellite Hybrid"
       assert ml.spec["center"] == [-74.5, 40]
       assert ml.spec["zoom"] == 3

@@ -45,8 +45,8 @@ defmodule MapLibre do
   """
 
   alias MapLibre.Utils
+  alias MapLibre.Styles
 
-  @default_style "https://demotiles.maplibre.org/style.json"
   @to_kebab Utils.kebab_case_properties()
   @geometries [Geo.Point, Geo.LineString, Geo.Polygon, Geo.GeometryCollection]
 
@@ -114,7 +114,7 @@ defmodule MapLibre do
   @spec new(keyword()) :: t()
   def new(opts \\ []) do
     validade_new_opts!(opts)
-    style = opts |> Keyword.get(:style, @default_style) |> to_style()
+    style = opts |> Keyword.get(:style, :default) |> to_style()
     ml = %MapLibre{spec: style}
     ml_props = opts |> Keyword.delete(:style) |> opts_to_ml_props()
     update_in(ml.spec, fn spec -> Map.merge(spec, ml_props) end)
@@ -595,10 +595,16 @@ defmodule MapLibre do
     Enum.join([String.downcase(part, :ascii) | Enum.map(parts, &String.capitalize(&1, :ascii))])
   end
 
-  defp to_style("http" <> _rest = style), do: Req.get!(style, http_errors: :raise).body
+  @compile {:no_warn_undefined, {Req, :get!, 2}}
+
   defp to_style(%{}), do: %{"version" => 8}
+  defp to_style(style) when is_atom(style), do: Styles.style(style)
   defp to_style(style) when is_map(style), do: style
-  defp to_style(style), do: Jason.decode!(style)
+
+  defp to_style("http" <> _rest = style) do
+    Utils.assert_req!()
+    Req.get!(style, http_errors: :raise).body
+  end
 
   defp geometry_from_table(data, spec, []) do
     geometries =
