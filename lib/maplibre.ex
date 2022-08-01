@@ -93,8 +93,8 @@ defmodule MapLibre do
     * `:zoom` - Default zoom level. The style zoom will be used only if the map has not been
       positioned by other means (e.g. map options or user interaction).
 
-    * `:style` - The initial style specification. Default:
-      "https://demotiles.maplibre.org/style.json"
+    * `:style` - The initial style specification. Three built-in initial styles are available:
+      `:default`, `:street` and `:terrain`.
 
   To manipulate any other [style root
   properties](https://maplibre.org/maplibre-gl-js-docs/style-spec/root/), use the
