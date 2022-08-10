@@ -1,4 +1,6 @@
 defmodule MapLibre.Styles do
+  @moduledoc false
+
   @default %{
     "bearing" => 0,
     "center" => [17.65431710431244, 32.954120326746775],
