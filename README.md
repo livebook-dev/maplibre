@@ -21,12 +21,13 @@ Mix.install([
 
 ### In Mix projects
 
-You can add the `:maplibre` dependency to your `mix.exs`:
+You can add the `:maplibre` dependency to your `mix.exs`.  `:req` is needed if you plan to load styles from an external URL (e.g. from maptiler.com):
 
 ```elixir
 def deps do
   [
-    {:maplibre, "~> 0.1.0"}
+    {:maplibre, "~> 0.1.2"},
+    {:req, "~> 0.3.1"}
   ]
 end
 ```
