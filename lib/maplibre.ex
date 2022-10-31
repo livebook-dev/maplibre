@@ -305,7 +305,8 @@ defmodule MapLibre do
 
       * `:fill` -  A filled polygon with an optional stroked border.
       * `:line` -  A stroked line.
-      * `:symbol` - An icon or a text label. "circle": A filled circle.
+      * `:symbol` - An icon or a text label.
+      * `:circle` - A filled circle.
       * `:heatmap` - A heatmap.
       * `:fill_extrusion` - An extruded (3D) polygon.
       * `:raster` - Raster map textures such as satellite imagery.
