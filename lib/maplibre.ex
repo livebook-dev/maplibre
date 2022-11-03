@@ -210,7 +210,7 @@ defmodule MapLibre do
       }
 
       Ml.new()
-      |> Ml.add_table_data("earthquakes", earthquakes, {:lng_lat, ["longitude", "latitude"]})
+      |> Ml.add_table_source("earthquakes", earthquakes, {:lng_lat, ["longitude", "latitude"]})
 
       earthquakes = %{
         "coordinates" => ["32.3646, 101.8781", "32.3357, 101.8413", "-9.0665, -71.2103"],
@@ -218,7 +218,7 @@ defmodule MapLibre do
       }
 
       Ml.new()
-      |> Ml.add_table_data("earthquakes", earthquakes, {:lat_lng, "coordinates"}, properties: ["mag"])
+      |> Ml.add_table_source("earthquakes", earthquakes, {:lat_lng, "coordinates"}, properties: ["mag"])
   """
   @spec add_table_source(t(), String.t(), term(), coordinates_spec(), keyword()) :: t()
   def add_table_source(ml, source, data, coordinates, opts \\ []) do
