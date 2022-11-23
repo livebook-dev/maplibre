@@ -295,6 +295,66 @@ defmodule MapLibreTest do
     end
   end
 
+  describe "add_geocode_source/3" do
+    test "adds a new source to the map by a given name" do
+      ml =
+        Ml.new()
+        |> Ml.add_geocode_source("brazil", "brazil")
+
+      source = ml.spec["sources"]["brazil"]
+      assert source["type"] == "geojson"
+
+      assert source["data"] ==
+               "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&q=brazil"
+    end
+
+    test "adds a new source to the map by a given address" do
+      ml =
+        Ml.new()
+        |> Ml.add_geocode_source("pilkington-avenue", "pilkington avenue, birmingham")
+
+      source = ml.spec["sources"]["pilkington-avenue"]
+      assert source["type"] == "geojson"
+
+      assert source["data"] ==
+               "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&q=pilkington+avenue,+birmingham"
+    end
+  end
+
+  describe "add_geocode_source/4" do
+    test "raises an error when an invalid geocode type is given" do
+      assert_raise ArgumentError,
+                   "unknown geocode type, expected one of :street, :city, :county, :state, :country, :postalcode, got: :invalid",
+                   fn ->
+                     Ml.new() |> Ml.add_geocode_source("invalid", "invalid", :invalid)
+                   end
+    end
+
+    test "adds a new source to the map by a given state" do
+      ml =
+        Ml.new()
+        |> Ml.add_geocode_source("ny", "new york", :state)
+
+      source = ml.spec["sources"]["ny"]
+      assert source["type"] == "geojson"
+
+      assert source["data"] ==
+               "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&state=new york"
+    end
+
+    test "adds a new source to the map by a given city" do
+      ml =
+        Ml.new()
+        |> Ml.add_geocode_source("new-york", "new york", :city)
+
+      source = ml.spec["sources"]["new-york"]
+      assert source["type"] == "geojson"
+
+      assert source["data"] ==
+               "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1&city=new york"
+    end
+  end
+
   describe "add_layer/2" do
     test "raises an error when no layer id is given" do
       assert_raise ArgumentError, "layer id is required", fn ->
