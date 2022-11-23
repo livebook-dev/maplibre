@@ -236,7 +236,7 @@ defmodule MapLibre do
   end
 
   @doc """
-  Adds a data source by a given geocoding to the sources in the specification.
+  Adds a data source by a given geocode to the sources in the specification.
 
   For the `:geojson` type, provides integration with [Nominatim](https://nominatim.org).
 
