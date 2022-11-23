@@ -49,6 +49,7 @@ defmodule MapLibre do
 
   @to_kebab Utils.kebab_case_properties()
   @geometries [Geo.Point, Geo.LineString, Geo.Polygon, Geo.GeometryCollection]
+  @query_base "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1"
 
   defstruct spec: %{}
 
@@ -163,8 +164,7 @@ defmodule MapLibre do
   def add_source(ml, source, opts) do
     validate_source!(opts)
     source = %{source => opts_to_ml_props(opts)}
-    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
-    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+    put_source(ml, source)
   end
 
   @doc """
@@ -187,8 +187,7 @@ defmodule MapLibre do
     data = Geo.JSON.encode!(geom, feature: true)
     source_props = opts_to_ml_props(opts) |> Map.merge(%{"type" => "geojson", "data" => data})
     source = %{source => source_props}
-    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
-    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+    put_source(ml, source)
   end
 
   @doc """
@@ -233,8 +232,45 @@ defmodule MapLibre do
       |> Map.merge(%{"type" => "geojson", "data" => data})
 
     source = %{source => source_props}
-    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
-    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
+    put_source(ml, source)
+  end
+
+  @doc """
+  Adds a data source by a given geocode to the sources in the specification.
+
+  For the `:geojson` type, provides integration with [Nominatim](https://nominatim.org).
+
+  Any valid geocode is support in a free-form query string.
+
+      Ml.new()
+      |> Ml.add_geocode_source("brazil", "brazil")
+      |> Ml.add_geocode_source("pilkington-avenue", "pilkington avenue, birmingham")
+  """
+  @spec add_geocode_source(t(), String.t(), String.t()) :: t()
+  def add_geocode_source(ml, source, query) do
+    query = String.replace(query, " ", "+")
+    data = "#{@query_base}&q=#{query}"
+    source = %{source => %{"type" => "geojson", "data" => data}}
+    put_source(ml, source)
+  end
+
+  @doc """
+  Same as `add_geocode_source/3` but for structured queries.
+
+  The last argument is an atom for the geocode type.
+
+  Supported types: `:street`, `:city`, `:county`, `:state`, `:country` and `:postalcode`
+
+      Ml.new()
+      |> Ml.add_geocode_source("new-york", "new york", :city)
+      |> Ml.add_geocode_source("ny", "new york", :state)
+  """
+  @spec add_geocode_source(t(), String.t(), String.t(), atom()) :: t()
+  def add_geocode_source(ml, source, query, type) do
+    validate_geocode_type!(type)
+    data = "#{@query_base}&#{type}=#{query}"
+    source = %{source => %{"type" => "geojson", "data" => data}}
+    put_source(ml, source)
   end
 
   defp validate_source!(opts) do
@@ -283,6 +319,17 @@ defmodule MapLibre do
           ArgumentError,
           "unsupported coordinates format. Expects a tuple of two elements, the first being the format (:lng_lat or :lat_lng) and the second being the column or the list of the two columns containing the coordinates"
         )
+    end
+  end
+
+  defp validate_geocode_type!(type) do
+    geocode_types = [:street, :city, :county, :state, :country, :postalcode]
+
+    if type not in geocode_types do
+      types = geocode_types |> Enum.map_join(", ", &inspect/1)
+
+      raise ArgumentError,
+            "unknown geocode type, expected one of #{types}, got: #{inspect(type)}"
     end
   end
 
@@ -687,5 +734,10 @@ defmodule MapLibre do
     else
       _ -> nil
     end
+  end
+
+  defp put_source(ml, source) do
+    sources = if ml.spec["sources"], do: Map.merge(ml.spec["sources"], source), else: source
+    update_in(ml.spec, fn spec -> Map.put(spec, "sources", sources) end)
   end
 end
