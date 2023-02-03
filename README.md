@@ -13,7 +13,7 @@ which case you can call `Mix.install/2`:
 ```elixir
 Mix.install([
   {:maplibre, "~> 0.1.3"},
-  {:kino_maplibre "~> 0.1.6"}
+  {:kino_maplibre, "~> 0.1.6"}
 ])
 ```
 
