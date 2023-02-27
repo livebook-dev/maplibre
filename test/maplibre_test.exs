@@ -386,7 +386,7 @@ defmodule MapLibreTest do
 
     test "raises an error when the layer refers to a source that doesn't exist" do
       assert_raise ArgumentError,
-                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "crimea", "maplibre"),
                    fn ->
                      Ml.new() |> Ml.add_layer(id: "invalid", type: :fill, source: "invalid")
                    end
@@ -422,7 +422,7 @@ defmodule MapLibreTest do
 
     test "raises an error when the layer refers to a source that doesn't exist" do
       assert_raise ArgumentError,
-                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "crimea", "maplibre"),
                    fn ->
                      Ml.new()
                      |> Ml.add_layer_below_labels(id: "invalid", type: :fill, source: "invalid")
@@ -452,7 +452,7 @@ defmodule MapLibreTest do
 
     test "raises an error if the given layer doesn't exist" do
       assert_raise ArgumentError,
-                   ~s(layer "invalid" was not found. Current available layers are: "background", "coastline", "countries-fill", "countries-boundary", "geolines", "geolines-label", "countries-label"),
+                   ~s(layer "invalid" was not found. Current available layers are: "background", "coastline", "countries-fill", "countries-boundary", "geolines", "geolines-label", "countries-label", "crimea-fill"),
                    fn ->
                      Ml.new() |> Ml.update_layer("invalid", type: :fill)
                    end
@@ -466,7 +466,7 @@ defmodule MapLibreTest do
 
     test "raises an error if updated to an invalid source" do
       assert_raise ArgumentError,
-                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "maplibre"),
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: "crimea", "maplibre"),
                    fn ->
                      Ml.new() |> Ml.update_layer("coastline", type: :fill, source: "invalid")
                    end
