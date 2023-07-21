@@ -778,7 +778,7 @@ defmodule MapLibre.Styles do
     "bearing" => 0,
     "center" => [0, 0],
     "glyphs" =>
-      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
+      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=Q4UbchekCfyvXvZcWRoU",
     "id" => "streets",
     "layers" => [
       %{
@@ -4128,7 +4128,7 @@ defmodule MapLibre.Styles do
       "openmaptiles" => %{
         "type" => "vector",
         "url" =>
-          "https://api.maptiler.com/tiles/v3/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+          "https://api.maptiler.com/tiles/v3/tiles.json?"
       }
     },
     "sprite" => "https://api.maptiler.com/maps/streets/sprite",
@@ -4140,7 +4140,7 @@ defmodule MapLibre.Styles do
     "bearing" => 0,
     "center" => [0, 0],
     "glyphs" =>
-      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
+      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=Q4UbchekCfyvXvZcWRoU",
     "id" => "hybrid",
     "layers" => [
       %{
@@ -4501,13 +4501,13 @@ defmodule MapLibre.Styles do
       "openmaptiles" => %{
         "type" => "vector",
         "url" =>
-          "https://api.maptiler.com/tiles/v3/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+          "https://api.maptiler.com/tiles/v3/tiles.json?key=Q4UbchekCfyvXvZcWRoU"
       },
       "satellite" => %{
         "tileSize" => 512,
         "type" => "raster",
         "url" =>
-          "https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+          "https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=Q4UbchekCfyvXvZcWRoU"
       }
     },
     "version" => 8,
