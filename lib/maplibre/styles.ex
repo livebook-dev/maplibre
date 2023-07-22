@@ -777,8 +777,7 @@ defmodule MapLibre.Styles do
   @street %{
     "bearing" => 0,
     "center" => [0, 0],
-    "glyphs" =>
-      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
+    "glyphs" => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=Q4UbchekCfyvXvZcWRoU",
     "id" => "streets",
     "layers" => [
       %{
@@ -3534,7 +3533,7 @@ defmodule MapLibre.Styles do
           ],
           "text-font" => ["Roboto Italic", "Noto Sans Italic"],
           "text-offset" => [0.8, 0.8],
-          "text-size" => %{"base" => 1, "stops" => ['\r\v', [15, 12]]}
+          "text-size" => %{"base" => 1, "stops" => [~c"\r\v", [15, 12]]}
         },
         "metadata" => %{},
         "minzoom" => 13,
@@ -3562,7 +3561,7 @@ defmodule MapLibre.Styles do
           ],
           "text-font" => ["Roboto Italic", "Noto Sans Italic"],
           "text-offset" => [0.8, 0.8],
-          "text-size" => %{"base" => 1, "stops" => ['\r\v', [15, 12]]}
+          "text-size" => %{"base" => 1, "stops" => [~c"\r\v", [15, 12]]}
         },
         "minzoom" => 12,
         "paint" => %{
@@ -3588,7 +3587,7 @@ defmodule MapLibre.Styles do
           ],
           "text-font" => ["Roboto Regular", "Noto Sans Regular"],
           "text-offset" => [0, 0.15],
-          "text-size" => %{"base" => 1, "stops" => ['\r\v', [14, 13]]}
+          "text-size" => %{"base" => 1, "stops" => [~c"\r\v", [14, 13]]}
         },
         "metadata" => %{},
         "paint" => %{
@@ -3738,7 +3737,7 @@ defmodule MapLibre.Styles do
           "text-offset" => [0, 0.6],
           "text-optional" => true,
           "text-padding" => 2,
-          "text-size" => %{"stops" => ['\b\n', [14, 13]]},
+          "text-size" => %{"stops" => [~c"\b\n", [14, 13]]},
           "visibility" => "visible"
         },
         "minzoom" => 8.5,
@@ -3785,7 +3784,7 @@ defmodule MapLibre.Styles do
           "text-font" => ["Roboto Condensed Italic", "Noto Sans Italic"],
           "text-letter-spacing" => 0.1,
           "text-max-width" => 9,
-          "text-size" => %{"base" => 1.2, "stops" => ['\f\n', [15, 14]]},
+          "text-size" => %{"base" => 1.2, "stops" => [~c"\f\n", [15, 14]]},
           "text-transform" => "none",
           "visibility" => "visible"
         },
@@ -3817,7 +3816,7 @@ defmodule MapLibre.Styles do
           "text-font" => ["Roboto Condensed Italic", "Noto Sans Italic"],
           "text-letter-spacing" => 0.1,
           "text-max-width" => 9,
-          "text-size" => %{"base" => 1.2, "stops" => ['\f\n', [15, 14]]},
+          "text-size" => %{"base" => 1.2, "stops" => [~c"\f\n", [15, 14]]},
           "text-transform" => "uppercase",
           "visibility" => "visible"
         },
@@ -3844,7 +3843,7 @@ defmodule MapLibre.Styles do
           ],
           "text-font" => ["Roboto Regular", "Noto Sans Regular"],
           "text-max-width" => 8,
-          "text-size" => %{"base" => 1.2, "stops" => ['\n\f', [15, 22]]}
+          "text-size" => %{"base" => 1.2, "stops" => [~c"\n\f", [15, 22]]}
         },
         "metadata" => %{},
         "minzoom" => 8,
@@ -3875,7 +3874,7 @@ defmodule MapLibre.Styles do
           "text-font" => ["Roboto Regular", "Noto Sans Regular"],
           "text-max-width" => 8,
           "text-offset" => [0, 0],
-          "text-size" => %{"base" => 1.2, "stops" => ['\a\f', [11, 16]]}
+          "text-size" => %{"base" => 1.2, "stops" => [~c"\a\f", [11, 16]]}
         },
         "metadata" => %{},
         "minzoom" => 6,
@@ -4127,8 +4126,7 @@ defmodule MapLibre.Styles do
       },
       "openmaptiles" => %{
         "type" => "vector",
-        "url" =>
-          "https://api.maptiler.com/tiles/v3/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+        "url" => "https://api.maptiler.com/tiles/v3/tiles.json?"
       }
     },
     "sprite" => "https://api.maptiler.com/maps/streets/sprite",
@@ -4139,8 +4137,7 @@ defmodule MapLibre.Styles do
   @terrain %{
     "bearing" => 0,
     "center" => [0, 0],
-    "glyphs" =>
-      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
+    "glyphs" => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=Q4UbchekCfyvXvZcWRoU",
     "id" => "hybrid",
     "layers" => [
       %{
@@ -4500,14 +4497,12 @@ defmodule MapLibre.Styles do
     "sources" => %{
       "openmaptiles" => %{
         "type" => "vector",
-        "url" =>
-          "https://api.maptiler.com/tiles/v3/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+        "url" => "https://api.maptiler.com/tiles/v3/tiles.json?key=Q4UbchekCfyvXvZcWRoU"
       },
       "satellite" => %{
         "tileSize" => 512,
         "type" => "raster",
-        "url" =>
-          "https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL"
+        "url" => "https://api.maptiler.com/tiles/satellite-v2/tiles.json?key=Q4UbchekCfyvXvZcWRoU"
       }
     },
     "version" => 8,
