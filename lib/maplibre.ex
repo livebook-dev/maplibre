@@ -47,6 +47,7 @@ defmodule MapLibre do
   alias MapLibre.Utils
   alias MapLibre.Styles
 
+  @maptiler_key "Q4UbchekCfyvXvZcWRoU"
   @to_kebab Utils.kebab_case_properties()
   @geometries [Geo.Point, Geo.LineString, Geo.Polygon, Geo.GeometryCollection]
   @query_base "https://nominatim.openstreetmap.org/search?format=geojson&limit=1&polygon_geojson=1"
@@ -97,6 +98,10 @@ defmodule MapLibre do
     * `:style` - The initial style specification. Three built-in initial styles are available:
       `:default`, `:street` and `:terrain`.
 
+    * `:key` - The [Maptiler](https://www.maptiler.com) key to be used by the built-in `:street`
+      and `:terrain` styles. If you don't provide a key, the default key (strictly for
+      non-commercial use) will be used.
+
   To manipulate any other [style root
   properties](https://maplibre.org/maplibre-gl-js/docs/style-spec/root/), use the
   corresponding functions
@@ -114,8 +119,10 @@ defmodule MapLibre do
   """
   @spec new(keyword()) :: t()
   def new(opts \\ []) do
+    {key, opts} = Keyword.pop(opts, :key)
+    key = if key, do: key, else: @maptiler_key
     validade_new_opts!(opts)
-    style = opts |> Keyword.get(:style, :default) |> to_style()
+    style = opts |> Keyword.get(:style, :default) |> to_style(key)
     ml = %MapLibre{spec: style}
     ml_props = opts |> Keyword.delete(:style) |> opts_to_ml_props()
     update_in(ml.spec, fn spec -> Map.merge(spec, ml_props) end)
@@ -645,11 +652,11 @@ defmodule MapLibre do
 
   @compile {:no_warn_undefined, {Req, :get!, 2}}
 
-  defp to_style(%{}), do: %{"version" => 8}
-  defp to_style(style) when is_atom(style), do: Styles.style(style)
-  defp to_style(style) when is_map(style), do: style
+  defp to_style(%{}, _key), do: %{"version" => 8}
+  defp to_style(style, key) when is_atom(style), do: Styles.style(style, key)
+  defp to_style(style, _key) when is_map(style), do: style
 
-  defp to_style("http" <> _rest = style) do
+  defp to_style("http" <> _rest = style, _key) do
     Utils.assert_req!()
     Req.get!(style, http_errors: :raise).body
   end

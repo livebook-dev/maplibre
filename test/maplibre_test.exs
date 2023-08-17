@@ -3,10 +3,12 @@ defmodule MapLibreTest do
 
   alias MapLibre, as: Ml
 
+  @maptiler_key "Q4UbchekCfyvXvZcWRoU"
+
   describe "new/1" do
     test "returns the initial default style" do
       ml = Ml.new() |> Ml.to_spec()
-      expected = MapLibre.Styles.style(:default)
+      expected = MapLibre.Styles.style(:default, @maptiler_key)
       assert ml == expected
     end
 
@@ -17,9 +19,15 @@ defmodule MapLibreTest do
       assert ml.spec["zoom"] == 3
     end
 
-    test "loads a custom style" do
+    test "loads a built-in style" do
       ml = Ml.new(style: :street) |> Ml.to_spec()
-      expected = MapLibre.Styles.style(:street)
+      expected = MapLibre.Styles.style(:street, @maptiler_key)
+      assert ml == expected
+    end
+
+    test "loads a built-in style with external key" do
+      ml = Ml.new(style: :street, key: "123456") |> Ml.to_spec()
+      expected = MapLibre.Styles.style(:street, "123456")
       assert ml == expected
     end
 
