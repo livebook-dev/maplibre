@@ -1,7 +1,7 @@
 # MapLibre
 
 Elixir bindings to [MapLibre Style
-Specification](https://maplibre.org/maplibre-gl-js-docs/style-spec/).
+Specification](https://maplibre.org/maplibre-gl-js/docs/style-spec/).
 
 ## Installation
 
