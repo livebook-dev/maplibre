@@ -1,7 +1,7 @@
 defmodule MapLibre.MixProject do
   use Mix.Project
 
-  @version "0.1.4"
+  @version "0.1.5"
   @description "Elixir bindings to MapLibre Style Specification"
 
   def project do
