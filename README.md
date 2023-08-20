@@ -12,7 +12,7 @@ which case you can call `Mix.install/2`:
 
 ```elixir
 Mix.install([
-  {:maplibre, "~> 0.1.5"},
+  {:maplibre, "~> 0.1.6"},
   {:kino_maplibre, "~> 0.1.6"}
 ])
 ```
@@ -26,7 +26,7 @@ You can add the `:maplibre` dependency to your `mix.exs`.  `:req` is needed if y
 ```elixir
 def deps do
   [
-    {:maplibre, "~> 0.1.5"},
+    {:maplibre, "~> 0.1.6"},
     {:req, "~> 0.3.1"}
   ]
 end
