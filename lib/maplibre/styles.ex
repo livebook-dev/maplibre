@@ -4156,7 +4156,7 @@ defmodule MapLibre.Styles do
         },
         "openmaptiles" => %{
           "type" => "vector",
-          "url" => "https://api.maptiler.com/tiles/v3/tiles.json?"
+          "url" => "https://api.maptiler.com/tiles/v3/tiles.json?key=#{maptiler_key}"
         }
       },
       "sprite" => "https://api.maptiler.com/maps/streets/sprite",
