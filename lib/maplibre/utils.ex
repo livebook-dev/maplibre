@@ -169,7 +169,7 @@ defmodule MapLibre.Utils do
 
       You can install it by adding
 
-          {:req, "~> 0.4.0"}
+          {:req, "~> 0.4 or ~> 1.0"}
 
       to your dependency list.
       """
