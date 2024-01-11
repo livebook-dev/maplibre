@@ -1,13 +1,13 @@
 defmodule MapLibre do
   @moduledoc """
   Elixir bindings to [MapLibre Style
-  Specification](https://maplibre.org/maplibre-gl-js/docs/style-spec/).
+  Specification](https://maplibre.org/maplibre-style-spec/).
 
   A MapLibre style is a document that defines the visual appearance of a map: what data to draw,
   the order to draw it in, and how to style the data when drawing it. A style document is a JSON
   object with specific root level and nested properties. To learn more about the style
   specification and its properties, please see the
-  [documentation](https://maplibre.org/maplibre-gl-js/docs/style-spec/)
+  [documentation](https://maplibre.org/maplibre-style-spec/)
 
   ## Composing maps
 
@@ -36,7 +36,7 @@ defmodule MapLibre do
 
   Expressions are extremely powerful and useful to render complex data. To use them just ensure
   that you pass valid expressions following the rules and syntax of the [official
-  documentation](https://maplibre.org/maplibre-gl-js/docs/style-spec/expressions/)
+  documentation](https://maplibre.org/maplibre-style-spec/expressions/)
 
   ## Options
 
@@ -103,7 +103,7 @@ defmodule MapLibre do
       non-commercial use) will be used.
 
   To manipulate any other [style root
-  properties](https://maplibre.org/maplibre-gl-js/docs/style-spec/root/), use the
+  properties](https://maplibre.org/maplibre-style-spec/root/), use the
   corresponding functions
 
   ## Examples
@@ -115,7 +115,7 @@ defmodule MapLibre do
       )
       |> ...
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/) for more details.
   """
   @spec new(keyword()) :: t()
   def new(opts \\ []) do
@@ -144,7 +144,7 @@ defmodule MapLibre do
   Returns the underlying MapLibre specification. The result is a nested Elixir data structure that
   serializes to MapLibre style JSON specification.
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/) for more details.
   """
   @spec to_spec(t()) :: spec()
   def to_spec(ml) do
@@ -165,7 +165,7 @@ defmodule MapLibre do
             data: "https://maplibre.org/maplibre-gl-js/docs/assets/rwanda-provinces.geojson"
       )
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/sources/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/sources/) for more details.
   """
   @spec add_source(t(), String.t(), keyword()) :: t()
   def add_source(ml, source, opts) do
@@ -400,7 +400,7 @@ defmodule MapLibre do
           paint: [fill_color: "#4A9661"]
       )
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/layers/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/layers/) for more details.
   """
   @spec add_layer(t(), keyword()) :: t()
   def add_layer(ml, opts) do
@@ -537,7 +537,7 @@ defmodule MapLibre do
       and p indicates the height of the light (from 0°, directly above, to 180°, directly below).
       Default: {1.15, 210, 30}
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/light/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/light/) for more details.
   """
   @spec light(t(), keyword()) :: t()
   def light(ml, opts) do
@@ -552,7 +552,7 @@ defmodule MapLibre do
   `:background_pattern`, `:fill_pattern`, `:line_pattern`,`:fill_extrusion_pattern` and `:icon_image` style
   properties.
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/sprite/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/sprite/) for more details.
   """
   @spec sprite(t(), String.t()) :: t()
   def sprite(ml, sprite) when is_binary(sprite) do
@@ -565,7 +565,7 @@ defmodule MapLibre do
   A style's glyphs property provides a URL template for loading signed-distance-field glyph sets
   in PBF format.
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/glyphs/) for more details.
+  See [the docs](https://maplibre.org/maplibre-style-spec/glyphs/) for more details.
   """
   @spec glyphs(t(), String.t()) :: t()
   def glyphs(ml, glyphs) when is_binary(glyphs) do
@@ -579,7 +579,7 @@ defmodule MapLibre do
   property's previous value and new value. A style's root transition property provides global
   transition defaults for that style.
 
-  See [the docs](https://maplibre.org/maplibre-gl-js/docs/style-spec/transition/) for more
+  See [the docs](https://maplibre.org/maplibre-style-spec/transition/) for more
   details.
   """
   @spec transition(t(), keyword()) :: t()
