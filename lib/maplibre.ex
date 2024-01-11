@@ -442,7 +442,7 @@ defmodule MapLibre do
 
     validate_layer_id!(ml, id)
     validate_layer_type!(type)
-    if type != :background, do: validate_layer_source!(ml, source)
+    if type != :background, do: validate_source!(ml, source, :layer)
   end
 
   defp validate_layer_update!(index, id, layers, ml, opts) do
@@ -456,7 +456,7 @@ defmodule MapLibre do
     type = opts[:type]
     source = opts[:source]
     if type, do: validate_layer_type!(type)
-    if source, do: validate_layer_source!(ml, source)
+    if source, do: validate_source!(ml, source, :layer)
   end
 
   defp validate_layer_id!(_ml, nil) do
@@ -497,17 +497,17 @@ defmodule MapLibre do
     end
   end
 
-  defp validate_layer_source!(_ml, nil) do
+  defp validate_source!(_ml, nil, type) do
     raise ArgumentError,
-          "layer source is required"
+          "#{type} source is required"
   end
 
-  defp validate_layer_source!(ml, source) do
+  defp validate_source!(ml, source, type) do
     if not Map.has_key?(ml.spec["sources"], source) do
       sources = Map.keys(ml.spec["sources"]) |> Enum.map_join(", ", &inspect/1)
 
       raise ArgumentError,
-            "source #{inspect(source)} was not found. The source must be present in the style before it can be associated with a layer. Current available sources are: #{sources}"
+            "source #{inspect(source)} was not found. The source must be present in the style before it can be associated with a #{type}. Current available sources are: #{sources}"
     end
   end
 
@@ -586,6 +586,21 @@ defmodule MapLibre do
   def transition(ml, opts) do
     transition = opts_to_ml_props(opts)
     update_in(ml.spec, fn spec -> Map.put(spec, "transition", transition) end)
+  end
+
+  @doc """
+  Add 3D terrain to the map.
+
+  The source must have been previously added to the map.
+
+  See [the docs](https://maplibre.org/maplibre-style-spec/terrain/) for more
+  details.
+  """
+  @spec terrain(t(), keyword()) :: t()
+  def terrain(ml, opts) do
+    validate_source!(ml, opts[:source], :terrain)
+    terrain = opts_to_ml_props(opts)
+    update_in(ml.spec, fn spec -> Map.put(spec, "terrain", terrain) end)
   end
 
   @doc """

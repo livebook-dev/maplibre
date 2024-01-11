@@ -517,4 +517,32 @@ defmodule MapLibreTest do
       assert ml.spec["metadata"]["meta:data"] == "updated"
     end
   end
+
+  describe "terrain/2" do
+    test "add a terrain to the map" do
+      ml =
+        Ml.new(style: %{})
+        |> Ml.add_source("terrain",
+          type: :raster_dem,
+          url: "https://demotiles.maplibre.org/terrain-tiles/tiles.json"
+        )
+        |> Ml.terrain(source: "terrain")
+
+      assert ml.spec["terrain"] == %{"source" => "terrain"}
+    end
+
+    test "raises an error if the terrain source does not exist" do
+      assert_raise ArgumentError,
+                   ~s(source "invalid" was not found. The source must be present in the style before it can be associated with a terrain. Current available sources are: "crimea", "maplibre"),
+                   fn ->
+                     Ml.new() |> Ml.terrain(source: "invalid")
+                   end
+    end
+
+    test "raises an error if the terrain source is not given" do
+      assert_raise ArgumentError, "terrain source is required", fn ->
+        Ml.new() |> Ml.terrain(exaggeration: 1)
+      end
+    end
+  end
 end
