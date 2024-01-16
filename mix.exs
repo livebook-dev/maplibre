@@ -1,7 +1,7 @@
 defmodule MapLibre.MixProject do
   use Mix.Project
 
-  @version "0.1.7"
+  @version "0.1.8"
   @description "Elixir bindings to MapLibre Style Specification"
 
   def project do
@@ -28,8 +28,8 @@ defmodule MapLibre.MixProject do
     [
       {:table, "~> 0.1.0"},
       {:geo, "~> 3.5.1 or ~> 3.6"},
-      {:req, "~> 0.3 or ~> 1.0", optional: true},
-      {:ex_doc, "~> 0.28", only: :dev, runtime: false}
+      {:req, "~> 0.4 or ~> 1.0", optional: true},
+      {:ex_doc, "~> 0.31.1", only: :dev, runtime: false}
     ]
   end
 
