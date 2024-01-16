@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Add 3D terrain to the map via `terrain/{2}`  ([#44](https://github.com/livebook-dev/maplibre/pull/44))
+* Add 3D terrain to the map via `terrain/2`  ([#44](https://github.com/livebook-dev/maplibre/pull/44))
 
 ### Fixed
 
