@@ -26,7 +26,7 @@ You can add the `:maplibre` dependency to your `mix.exs`.  `:req` is needed if y
 ```elixir
 def deps do
   [
-    {:maplibre, "~> 0.1.6"},
+    {:maplibre, "~> 0.1.8"},
     {:req, "~> 0.4 or ~> 1.0"}
   ]
 end
