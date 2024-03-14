@@ -38,6 +38,23 @@ defmodule MapLibreTest do
       assert ml.spec["zoom"] == 3
     end
 
+    test "load an external style" do
+      style = %{
+        "bearing" => 2,
+        "center" => [17.65431710431244, 32.954120326746775],
+        "glyphs" => "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+        "id" => "43f36e14-e3f5-43c1-84c0-50a9c80dc5c7",
+        "layers" => [],
+        "sources" => [],
+        "name" => "external style"
+      }
+
+      ml = Ml.new(style: style)
+      assert ml.spec["center"] == [17.65431710431244, 32.954120326746775]
+      assert ml.spec["bearing"] == 2
+      assert ml.spec["name"] == "external style"
+    end
+
     test "raises an error when invalid options are given" do
       assert_raise ArgumentError,
                    "unknown option, expected one of :bearing, :center, :name, :pitch, :zoom, :style, got: :invalid",
