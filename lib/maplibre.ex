@@ -667,7 +667,7 @@ defmodule MapLibre do
 
   @compile {:no_warn_undefined, {Req, :get!, 2}}
 
-  defp to_style(%{}, _key), do: %{"version" => 8}
+  defp to_style(style, _key) when style == %{}, do: %{"version" => 8}
   defp to_style(style, key) when is_atom(style), do: Styles.style(style, key)
   defp to_style(style, _key) when is_map(style), do: style
 
